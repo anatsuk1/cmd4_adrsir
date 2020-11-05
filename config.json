@@ -1,0 +1,69 @@
+{
+  "bridge": {
+    "name": "Rasberry Pi v4B",
+    "username": "CC:22:3D:E3:CE:30",
+    "manufacturer": "anatsuk1",
+    "model": "homebridge",
+    "port": 51826,
+    "pin": "031-45-156"
+  },
+
+  "ports": {
+    "start": 52100,
+    "end": 52150,
+    "comment": "This section is used to control the range of ports that separate accessory (like camera or television) should be bind to."
+  },
+  
+   "platforms" :
+   [
+      {
+         "platform": "Cmd4",
+         "name": "Cmd4",
+         "outputConstants": false,
+         "accessories" :
+         [
+            {
+               "type": "Fanv1",
+               "displayName": "CeilingFan",
+               "on": "FALSE",
+               "name": "CeilingFan",
+               "Manufacturer": "Unknown",
+               "Model": "Cmd4 Model",
+               "SerialNumber": "anatsuk1",
+               "stateChangeResponseTime": 3,
+               "state_cmd": "/var/lib/homebridge/cmd4_adrsir.py"
+            },
+            {
+               "type": "Lightbulb",
+               "displayName": "BrightLight",
+               "on": "FALSE",
+               "brightness": 8,
+               "hue": 8,
+               "saturation": 8,
+               "colorTemperature": 8,
+               "name": "BrightLight",
+               "Manufacturer": "Panasonic",
+               "Model": "Cmd4 model",
+               "SerialNumber": "anatsuk1",
+               "stateChangeResponseTime": 3,
+               "state_cmd": "/var/lib/homebridge/cmd4_adrsir.py"
+            },
+            {
+               "type": "Lightbulb",
+               "displayName": "DimLight",
+               "on": "FALSE",
+               "brightness": 8,
+               "hue": 8,
+               "saturation": 8,
+               "colorTemperature": 8,
+               "name": "DimLight",
+               "Manufacturer": "Panasonic",
+               "Model": "Cmd4 model",
+               "SerialNumber": "anatsuk1",
+               "stateChangeResponseTime": 3,
+               "state_cmd": "/var/lib/homebridge/cmd4_adrsir.py"
+            }
+         ]
+      }
+   ]
+}
