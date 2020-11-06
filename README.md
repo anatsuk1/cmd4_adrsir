@@ -47,9 +47,9 @@ STATE_SCRIPT = "/var/lib/homebridge/Cmd4Scripts/State.js"
 IRCONTROL = "/var/lib/homebridge/adrsir/ircontrol"
 ```
 
-## Redesign select_irdata function
+## Redesign send_irdata function
 
-Rewrite handle event and action.
+Rewrite handle events and actions.
 
 **e.g.**
 
