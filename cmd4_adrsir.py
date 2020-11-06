@@ -43,59 +43,70 @@ def exec_state_stript(direction, device, action, param=""):
                     command[2:], current), file=log)
     return current
 
-def select_irdata(device, action, next):
+def select_light_name(on, bright, name_prefix):
 
     irdata = None
-    # Note: device is "displayName". It is NOT "name".
+    bright_int = int(bright)
+
+    # On atteribute is true
+    if on == "true":
+
+        # Bright 100% ir data
+        if bright_int == 100:
+            irdata = name_prefix + "_full"
+
+        # off ir data
+        elif bright_int == 0:
+            irdata = name_prefix + "_off"
+
+        # Bright xx%(prefered) ir data
+        elif bright_int <= 20:
+            irdata = name_prefix + "_night"
+        else:
+            irdata = name_prefix + "_preference"
+
+    # On atteribute is false
+    elif on == "false":
+        irdata = name_prefix + "_off"
     
+    return irdata
+
+def send_irdata(device, action, next):
+
+    irdata = None
+
+    # Note: device is "displayName". It is NOT "name".
     if device == "CeilingFan":
         if action == "On":
             # On atteribute is associate true or false
             irdata = "ceiling_fan_power"
  
     elif device == "BrightLight":
+
         if action == "On":
-            # On atteribute is true
-            if next == "true":
-                bright = exec_state_stript("Get", device, "Brightness")
-
-                # Bright 100% ir data
-                if bright == "100":
-                    irdata = "brightlight_full"
-                # off ir data
-                elif bright == "0":
-                    irdata = "brightlight_off"
-                # Bright xx%(prefered) ir data
-                else:
-                    irdata = "brightlight_preference"
-
-            # On atteribute is false
-            elif next == "false":
-                irdata = "brightlight_off"
+            bright = exec_state_stript("Get", device, "Brightness")
+            irdata = select_light_name(next, bright, "brightlight")
+        elif action == "Brightness":
+            on = exec_state_stript("Get", device, "On")
+            irdata = select_light_name(on, next, "brightlight")
 
     elif device == "DimLight":
+
         if action == "On":
-            # On atteribute is true
-            if next == "true":
-                bright = exec_state_stript("Get", device, "Brightness")
+            bright = exec_state_stript("Get", device, "Brightness")
+            irdata = select_light_name(next, bright, "dimlight")
+        elif action == "Brightness":
+            on = exec_state_stript("Get", device, "On")
+            irdata = select_light_name(on, next, "dimlight")
 
-                # Bright 100% ir data
-                if bright == "100":
-                    irdata = "dimlight_full"
-                # off ir data
-                elif bright == "0":
-                    irdata = "dimlight_off"
-                # Bright xx%(prefered) ir data
-                elif bright <= "20":
-                    irdata = "dimlight_night"
-                else:
-                    irdata = "dimlight_preference"
+    # Run ircontrol command like as "<location>/ircontrol send ceiling_fan_power".
+    if irdata is not None:
+        if DEBUG:
+            with open(LOG_FILE, mode="a") as log:
+                print("[{}] IrCommand: {} {} {}".format(datetime.datetime.now().timetz(), 
+                        IRCONTROL, "send", irdata), file=log)
+        subprocess.run([IRCONTROL, "send", irdata])
 
-            # On atteribute is false
-            elif next == "false":
-                irdata = "dimlight_off"
-
-    return irdata
 
 def start_process(value):
 
@@ -112,27 +123,14 @@ def start_process(value):
     # value[2]: is value of "displayName" attribute. It is NOT "name" attribute.
     #           "displayName" is attribute name on config.json in homebridge, defined by homebridge-cmd4.
     # value[3]: user choiced attribute with maybe upper case.
-    # value[4]: if value[1] is "Get", numeric value of value[3] attribute.
+    # value[4]: only if value[1] is "Set", numeric value of value[3] attribute. overwise nothing.
 
-    if value[1] == "Get":
+    if value[1] == "Set":
+        send_irdata(value[2], value[3], value[4])
 
-        current = exec_state_stript("Get", value[2], value[3])
-        print(current)
-
-    elif value[1] == "Set":
-
-        # Run ircontrol command like as "<location>/ircontrol send ceiling_fan_power".
-        irdata = select_irdata(value[2], value[3], value[4])
-        if irdata is not None:
-            if DEBUG:
-                with open(LOG_FILE, mode="a") as log:
-                    print("[{}] IrCommand: {} {} {}".format(datetime.datetime.now().timetz(), 
-                            IRCONTROL, "send", irdata), file=log)
-            subprocess.run([IRCONTROL, "send", irdata])
-
-        # Set the state of devices from homebridge state script.
-        current = exec_state_stript("Set", value[2], value[3], value[4])
-        print(current)
+    param = value[4] if len(value) > 4 else ""
+    current = exec_state_stript(value[1], value[2], value[3], param)
+    print(current)
 
 if __name__ == "__main__":
 

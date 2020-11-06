@@ -45,7 +45,7 @@
                "Manufacturer": "Panasonic",
                "Model": "Cmd4 model",
                "SerialNumber": "anatsuk1",
-               "stateChangeResponseTime": 3,
+               "stateChangeResponseTime": 1,
                "state_cmd": "/var/lib/homebridge/cmd4_adrsir.py"
             },
             {
@@ -60,7 +60,7 @@
                "Manufacturer": "Panasonic",
                "Model": "Cmd4 model",
                "SerialNumber": "anatsuk1",
-               "stateChangeResponseTime": 3,
+               "stateChangeResponseTime": 1,
                "state_cmd": "/var/lib/homebridge/cmd4_adrsir.py"
             }
          ]
