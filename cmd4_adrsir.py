@@ -22,8 +22,8 @@ LOCK_FILE = "/var/lib/homebridge/process.lock"
 # homebridge-cmd4 state script on node.js
 STATE_INTPRT = "node"
 STATE_SCRIPT = "/var/lib/homebridge/Cmd4Scripts/State.js"
-# adrsir script on python3
-IRCONTROL = "/var/lib/homebridge/adrsir/ircontrol"
+# adrsirlib script on python3
+IRCONTROL = "/usr/local/etc/adrsirlib/ircontrol"
 
 #
 # Implimentation of functions 
@@ -39,36 +39,59 @@ def exec_state_stript(direction, device, action, param=""):
     # for debug
     if DEBUG:
         with open(LOG_FILE, mode="a") as log:
-            print("[{}]Script Result {}: {}".format(datetime.datetime.now().timetz(),
+            print("[{}] State Result {}: {}".format(datetime.datetime.now().timetz(),
                     command[2:], current), file=log)
     return current
 
-def select_light_name(on, bright, name_prefix):
+def select_light_name(on_str, bright_str, name_prefix):
 
     irdata = None
-    bright_int = int(bright)
+    bright = int(bright_str)
 
     # On atteribute is true
-    if on == "true":
+    if on_str == "true":
 
         # Bright 100% ir data
-        if bright_int == 100:
+        if bright == 100:
             irdata = name_prefix + "_full"
 
         # off ir data
-        elif bright_int == 0:
+        elif bright == 0:
             irdata = name_prefix + "_off"
 
         # Bright xx%(prefered) ir data
-        elif bright_int <= 20:
+        elif bright <= 20:
             irdata = name_prefix + "_night"
         else:
             irdata = name_prefix + "_preference"
 
     # On atteribute is false
-    elif on == "false":
+    elif on_str == "false":
         irdata = name_prefix + "_off"
     
+    return irdata
+
+def select_aircon_name(active_str, heater_cooler_str):
+
+    irdata = None
+    active = int(active_str)
+    heater_cooler = int(heater_cooler_str)
+
+    # INACTIVE
+    if active == 0:
+        irdata = "aircon_off"
+    # ACTIVE
+    elif active == 1:
+        # INACTIVE or AUTO
+        if heater_cooler == 0:
+            irdata = "aircon_off"
+        # heating
+        elif heater_cooler == 1:
+            irdata = "aircon_warm-22-auto"
+        # cooling
+        elif heater_cooler == 2:
+            irdata = "aircon_cool-26-auto"
+
     return irdata
 
 def send_irdata(device, action, next):
@@ -99,11 +122,17 @@ def send_irdata(device, action, next):
             on = exec_state_stript("Get", device, "On")
             irdata = select_light_name(on, next, "dimlight")
 
+    elif device == "AirConditioner":
+
+        if action == "Active":
+            heater_cooler = exec_state_stript("Get", device, "CurrentHeaterCoolerState")
+            irdata = select_aircon_name(next, heater_cooler)
+
     # Run ircontrol command like as "<location>/ircontrol send ceiling_fan_power".
     if irdata is not None:
         if DEBUG:
             with open(LOG_FILE, mode="a") as log:
-                print("[{}] IrCommand: {} {} {}".format(datetime.datetime.now().timetz(), 
+                print("[{}]IrCommand: {} {} {}".format(datetime.datetime.now().timetz(), 
                         IRCONTROL, "send", irdata), file=log)
         subprocess.run([IRCONTROL, "send", irdata])
 
@@ -113,7 +142,7 @@ def start_process(value):
     # for debug
     if DEBUG:
         with open(LOG_FILE, mode="a") as log:
-            print("[{}]start with sys.argv: {}".format(datetime.datetime.now().timetz(),
+            print("[{}]Cmd Argv: {}".format(datetime.datetime.now().timetz(),
                     value), file=log)
 
     # Depend on adrsirlib and homebridge-cmd4 state script.
@@ -135,7 +164,7 @@ def start_process(value):
 if __name__ == "__main__":
 
     # for debug
-    if DEBUG:
+    if False:
         with open(LOG_FILE, mode="a") as log:
             print("[{}]sys.argv: {}".format(datetime.datetime.now().timetz(),
                     sys.argv), file=log)
