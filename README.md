@@ -1,37 +1,35 @@
 # cmd4_adrsir
-A python script for [adrsirlib](https://github.com/tokieng/adrsirlib) and [Homebridges-cmd4](https://github.com/ztalbot2000/homebridge-cmd4).
+cmd4_adrsir is a python script for [adrsirlib](https://github.com/tokieng/adrsirlib) and [Homebridges-cmd4](https://github.com/ztalbot2000/homebridge-cmd4).
 
 # Usage
-Write the path to the script as value of the state_cmd attribute in config.json that homebridge has.
+Set the path you stored this script to **state_cmd** attribute in config.json contained into homebridge.
 
 **e.g.**
 ```
-            {
-               "type": "Fanv1",
-               "displayName": "CeilingFan",
-               "on": "FALSE",
-               "name": "CeilingFan",
-               "Manufacturer": "Unknown",
-               "Model": "Cmd4 Model",
-               "SerialNumber": "anatsuk1",
-               "stateChangeResponseTime": 3,
-               "state_cmd": "/var/lib/homebridge/cmd4_adrsir.py"
-            },
+    {
+        "type": "Fanv1",
+        "displayName": "CeilingFan",
+        "on": "FALSE",
+        "name": "CeilingFan",
+        "Manufacturer": "Unknown",
+        "Model": "Cmd4 Model",
+        "SerialNumber": "anatsuk1",
+        "stateChangeResponseTime": 3,
+        "state_cmd": "/var/lib/homebridge/cmd4_adrsir.py"
+    },
 ```
 
-You have to rewrite the script and config.json included into cmd4_adrsir to your environment.
-
 # Port the script to your environment
+You need to port this script and config.json included into cmd4_adrsir to your environment.
+Both files, this script and config.json, are my preference.
 
 ## config.json
-Add your accrssories to config.json.
-Change config.json to your environment.
+Add your accessories with your environment to config.json.
 
 ## cmd4_adrsir.py
+Set the paths to customizable variable.
 
-Rewrite const value to your environment.
-
-|value|Description
+|variable|Description
 |:-----------|:------------
 |STATE_INTPRT|path to node command
 |STATE_SCRIPT|path to State.js of Cmd4Script
@@ -44,20 +42,21 @@ Rewrite const value to your environment.
 STATE_INTPRT = "node"
 STATE_SCRIPT = "/var/lib/homebridge/Cmd4Scripts/State.js"
 # adrsir script on python3
-IRCONTROL = "/var/lib/homebridge/adrsir/ircontrol"
+IRCONTROL = "/usr/local/etc/adrsirlib/ircontrol"
 ```
 
 ## Redesign send_irdata function
 
-Rewrite handle events and actions.
+Redesign send_irdata function for your devices you join apple home network.
+Determine events you dispatch, program event handler which controls your devices.
 
 **e.g.**
 
 ```python3:cmd4_adrsir.py
-    if device == "CeilingFan":
-        if action == "On":
-            # On atteribute is associate true or false
-            irdata = "ceiling_fan_power"
+if device == "CeilingFan":
+    if action == "On":
+        # On atteribute is associate true or false
+        irdata = "ceiling_fan_power"
 ```
 
 # Thanks
@@ -69,4 +68,4 @@ I have a trouble. Provided useless official scripts and no support.
 But I found adrsirlib and am happy.
 
 ## Homebridges-cmd4 : https://github.com/ztalbot2000/homebridge-cmd4
-Better homebridge plugin but I did not find some documentations and examples.
+Better homebridge plugin, I want more documentations and examples.
