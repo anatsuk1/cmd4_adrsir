@@ -99,12 +99,8 @@ def send_irdata(device, action, next):
     irdata = None
 
     # Note: device is "displayName". It is NOT "name".
-    if device == "CeilingFan":
-        if action == "On":
-            # On atteribute is associate true or false
-            irdata = "ceiling_fan_power"
  
-    elif device == "BrightLight":
+    if device == "BrightLight":
 
         if action == "On":
             bright = exec_state_stript("Get", device, "Brightness")
