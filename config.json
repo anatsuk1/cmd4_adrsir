@@ -17,22 +17,24 @@
    "platforms" :
    [
       {
+         "platform": "DysonPlatform",
+         "name": "DysonPlatform",
+         "accessories": [
+            {
+               "displayName": "DysonFan",
+               "ip": "DYSON-IP",
+               "serialNumber": "DYSON-SERIALNUMBER",
+               "password": "DYSON-PASSWORD",
+               "focusModeVisible" : false
+            }
+         ]
+      },
+      {
          "platform": "Cmd4",
          "name": "Cmd4",
          "outputConstants": false,
          "accessories" :
          [
-            {
-               "type": "Fanv1",
-               "displayName": "CeilingFan",
-               "on": "FALSE",
-               "name": "CeilingFan",
-               "Manufacturer": "Unknown",
-               "Model": "Cmd4 Model",
-               "SerialNumber": "anatsuk1",
-               "stateChangeResponseTime": 1,
-               "state_cmd": "/var/lib/homebridge/cmd4_adrsir.py"
-            },
             {
                "type": "Lightbulb",
                "displayName": "BrightLight",

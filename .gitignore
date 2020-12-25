@@ -130,3 +130,4 @@ dmypy.json
 
 # added by anatsuk1
 .DS_Store
+copy_config_json.bash
