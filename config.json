@@ -33,7 +33,7 @@
          "platform": "Cmd4",
          "name": "Cmd4",
          "outputConstants": false,
-         "restartRecover": true,
+         "restartRecover": false,
          "accessories" : [
             {
                "type": "Lightbulb",
