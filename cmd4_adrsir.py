@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2020, anatsuk1
+# Copyright (c) 2020, 2021, anatsuk1
 # All rights reserved.
 #
 # BSD 2-Clause License
@@ -10,10 +10,12 @@ import sys
 import time, datetime
 import fcntl
 
+# For debug
+DEBUG = False
+
 #
 # Modify interpreter and script location
 #
-DEBUG = False
 LOG_FILE = "/home/pi/log.txt"
 
 # Lock for Processes
@@ -29,12 +31,14 @@ IRCONTROL = "/usr/local/etc/adrsirlib/ircontrol"
 # Implimentation of functions 
 #
 def exec_state_stript(direction, device, action, param=""):
+
     # Get the state of devices from homebridge-cmd4 state script.
     # Prepare argument to shift right for run script. 
     command = [STATE_INTPRT, STATE_SCRIPT, direction, device, action, param]
 
     result = subprocess.run(command, encoding="utf-8", stdout=subprocess.PIPE)
     current = result.stdout.strip()
+    current = current.strip("\"");
 
     # for debug
     if DEBUG:
@@ -46,10 +50,11 @@ def exec_state_stript(direction, device, action, param=""):
 def select_light_name(on_str, bright_str, name_prefix):
 
     irdata = None
+    on_value = on_str.upper()
     bright = int(bright_str)
 
     # On atteribute is true
-    if on_str == "true":
+    if on_value == "TRUE":
 
         # Bright 100% ir data
         if bright == 100:
@@ -59,14 +64,17 @@ def select_light_name(on_str, bright_str, name_prefix):
         elif bright == 0:
             irdata = name_prefix + "_off"
 
-        # Bright xx%(prefered) ir data
+        # Bright night ir data
         elif bright <= 20:
             irdata = name_prefix + "_night"
+
+        # Bright xx%(prefered).
+        # 20% < prefered bright < 100%
         else:
             irdata = name_prefix + "_preference"
 
     # On atteribute is false
-    elif on_str == "false":
+    elif on_str == "FALSE":
         irdata = name_prefix + "_off"
     
     return irdata
@@ -74,22 +82,22 @@ def select_light_name(on_str, bright_str, name_prefix):
 def select_aircon_name(active_str, heater_cooler_str):
 
     irdata = None
-    active = int(active_str)
-    heater_cooler = int(heater_cooler_str)
+    active = active_str.upper()
+    heater_cooler = heater_cooler_str.upper()
 
     # INACTIVE
-    if active == 0:
+    if active == "INACTIVE":
         irdata = "aircon_off"
     # ACTIVE
-    elif active == 1:
-        # INACTIVE or AUTO
-        if heater_cooler == 0:
+    elif active == "ACTIVE":
+        # AUTO, if INACTIVE or IDLE comes, perhaps cmd4 is in bug
+        if heater_cooler == "AUTO" or heater_cooler == "INACTIVE" or heater_cooler ==  "IDLE":
             irdata = "aircon_off"
-        # heating
-        elif heater_cooler == 1:
+        # HEAT
+        elif heater_cooler == "HEAT":
             irdata = "aircon_warm-22-auto"
-        # cooling
-        elif heater_cooler == 2:
+        # COOL
+        elif heater_cooler == "COOL":
             irdata = "aircon_cool-26-auto"
 
     return irdata
@@ -121,17 +129,23 @@ def send_irdata(device, action, next):
     elif device == "AirConditioner":
 
         if action == "Active":
-            heater_cooler = exec_state_stript("Get", device, "CurrentHeaterCoolerState")
+
+            heater_cooler = exec_state_stript("Get", device, "TargetHeaterCoolerState")
             irdata = select_aircon_name(next, heater_cooler)
 
-    # Run ircontrol command like as "<location>/ircontrol send ceiling_fan_power".
+        elif action == "TargetHeaterCoolerState":
+            active = exec_state_stript("Get", device, "Active")
+            irdata = select_aircon_name(active, next)
+
+    # Run ircontrol command like as "<location>/ircontrol <option> <ir data name>".
+    # e.g. $ /usr/local/etc/adrsirlib/ircontrol send brightlight_preference
     if irdata is not None:
-        if DEBUG:
-            with open(LOG_FILE, mode="a") as log:
-                print("[{}]IrCommand: {} {} {}".format(datetime.datetime.now().timetz(), 
-                        IRCONTROL, "send", irdata), file=log)
         subprocess.run([IRCONTROL, "send", irdata])
 
+    if DEBUG:
+        with open(LOG_FILE, mode="a") as log:
+            print("[{}]IrCommand: {} {} {}".format(datetime.datetime.now().timetz(), 
+                    IRCONTROL, "send", irdata), file=log)
 
 def start_process(value):
 
@@ -151,10 +165,23 @@ def start_process(value):
     # value[4]: only if value[1] is "Set", numeric value of value[3] attribute. overwise nothing.
 
     if value[1] == "Set":
+
+        current = exec_state_stript(value[1], value[2], value[3], value[4])
+
+        # Simulate current state, When set target state, set current state in the same time.
+        if value[3] == "TargetHeaterCoolerState":
+            if value[4].upper() != "AUTO":
+                exec_state_stript(value[1], value[2], "CurrentHeaterCoolerState", value[4])
+
+        # send ir data.
         send_irdata(value[2], value[3], value[4])
 
-    param = value[4] if len(value) > 4 else ""
-    current = exec_state_stript(value[1], value[2], value[3], param)
+
+
+    elif value[1] == "Get":
+
+        current = exec_state_stript(value[1], value[2], value[3], "dummy")
+
     print(current)
 
 if __name__ == "__main__":
