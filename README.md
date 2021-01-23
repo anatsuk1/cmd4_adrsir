@@ -114,3 +114,8 @@ But I am happy to have found adrsirlib now.
 I hope that ztalbot2000 provides documentations and examples of comebridges-cmd4 more.
 
 [ztalbot2000's GitHub page is here.][Homebridges-cmd4]
+
+# Environment
+- Python 3.7.3
+- Homebridges-cmd4 3.0.7
+- Homebridge 1.2.5
