@@ -111,7 +111,7 @@ But I am happy to have found adrsirlib now.
 
 @ztalbot2000 provide me better homebridge plugin.
 
-I hope that ztalbot2000 provides documentations and examples of comebridges-cmd4 more.
+I hope that ztalbot2000 provides documentations and examples of Homebridges-cmd4 more.
 
 [ztalbot2000's GitHub page is here.][Homebridges-cmd4]
 
