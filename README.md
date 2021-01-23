@@ -116,6 +116,8 @@ I hope that ztalbot2000 provides documentations and examples of comebridges-cmd4
 [ztalbot2000's GitHub page is here.][Homebridges-cmd4]
 
 # Environment
+
+cmd4_adrsir is running but not limited with the followings.
 - Python 3.7.3
 - Homebridges-cmd4 3.0.7
 - Homebridge 1.2.5
