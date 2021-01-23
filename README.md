@@ -100,7 +100,7 @@ Finally, this function send `irdata` as infrared data, move the device state to 
 ## adrsirlib
 @tokieng created the python script which great and helpful.
 
-[Bit Trade One, LTD.](https://bit-trade-one.co.jp) provided useless scripts and no supports. 
+[Bit Trade One, LTD.(ADRSIR design, manufacturing and sales)](https://bit-trade-one.co.jp) provided useless scripts and no supports. 
 
 But I am happy to have found adrsirlib now.
 
