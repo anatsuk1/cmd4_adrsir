@@ -1,11 +1,11 @@
 # cmd4_adrsir
 
 [adrsirlib]: https://github.com/tokieng/adrsirlib
-[Homebridges-cmd4]: https://github.com/ztalbot2000/homebridge-cmd
+[homebridges-cmd4]: https://github.com/ztalbot2000/homebridge-cmd4
 
 The cmd4_adrsir is to select and send ir data, written in Python 3.7(perhaps 3.0 or latar).
 
-`cmd4_adrsir` launchs [adrsirlib][adrsirlib], just fit to value of state_cmd attribute of [Homebridges-cmd4][Homebridges-cmd4].
+`cmd4_adrsir` launchs [adrsirlib][adrsirlib], just fit to value of state_cmd attribute of [homebridges-cmd4][homebridges-cmd4].
 
 # Usage
 Describe the path to `cmd_adrsir` stored in **state_cmd** attribute in `config.json` contained into homebridge.
@@ -98,7 +98,7 @@ Finally, this function send `irdata` as infrared data, move the device state to 
 
 # Thanks
 ## adrsirlib
-tokieng created the python script which great and helpful.
+@tokieng created the python script which great and helpful.
 
 [Bit Trade One, LTD.](https://bit-trade-one.co.jp) provided useless scripts and no supports. 
 
@@ -109,7 +109,7 @@ But I am happy to have found adrsirlib now.
 
 ## Homebridges-cmd4
 
-ztalbot2000 provide me better homebridge plugin.
+@ztalbot2000 provide me better homebridge plugin.
 
 I hope that ztalbot2000 provides documentations and examples of comebridges-cmd4 more.
 
