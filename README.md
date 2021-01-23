@@ -1,39 +1,59 @@
 # cmd4_adrsir
-cmd4_adrsir is a python script for [adrsirlib](https://github.com/tokieng/adrsirlib) and [Homebridges-cmd4](https://github.com/ztalbot2000/homebridge-cmd4).
+
+[adrsirlib]: https://github.com/tokieng/adrsirlib
+[Homebridges-cmd4]: https://github.com/ztalbot2000/homebridge-cmd
+
+The cmd4_adrsir is to select and send ir data, written in Python 3.7(perhaps 3.0 or latar).
+
+`cmd4_adrsir` launchs [adrsirlib][adrsirlib], just fit to value of state_cmd attribute of [Homebridges-cmd4][Homebridges-cmd4].
 
 # Usage
-Set the path you stored this script to **state_cmd** attribute in config.json contained into homebridge.
+Describe the path to `cmd_adrsir` stored in **state_cmd** attribute in `config.json` contained into homebridge.
+
+An example for description is here:
 
 **e.g.**
 ```
     {
-        "type": "Fanv1",
-        "displayName": "CeilingFan",
+        "type": "Lightbulb",
+        "displayName": "BrightLight",
         "on": "FALSE",
-        "name": "CeilingFan",
-        "Manufacturer": "Unknown",
-        "Model": "Cmd4 Model",
+        "brightness": 0,
+        "colorTemperature": 0,
+        "name": "BrightLight",
+        "Manufacturer": "Panasonic",
+        "Model": "Cmd4 model",
         "SerialNumber": "anatsuk1",
-        "stateChangeResponseTime": 3,
+        "stateChangeResponseTime": 1,
         "state_cmd": "/var/lib/homebridge/cmd4_adrsir.py"
     },
 ```
 
-# Port the script to your environment
-You need to port this script and config.json included into cmd4_adrsir to your environment.
-Both files, this script and config.json, are my preference.
+# Port cmd4_adrsir to your environment
+
+1. Describe config.json of your preference.
+1. Port cmd4_adrsir.py to your environment.
+
+The present both files are for my environment and preference.
 
 ## config.json
-Add your accessories with your environment to config.json.
+
+Describe the path to `cmd_adrsir` stored in **state_cmd** attribute in `config.json`
+
+```
+"state_cmd": "/var/lib/homebridge/cmd4_adrsir.py"
+```
 
 ## cmd4_adrsir.py
-Set the paths to customizable variable.
+Set environment dependent commands in below Variables.
 
-|variable|Description
+|Variable|Description
 |:-----------|:------------
-|STATE_INTPRT|path to node command
-|STATE_SCRIPT|path to State.js of Cmd4Script
-|IRCONTROL|path to ircontrol script
+|STATE_INTPRT|path to the node command
+|STATE_SCRIPT|path to `State.js` file contained in Homebridges-cmd4
+|IRCONTROL|path to `ircontrol` script file contained in adrsirlib
+
+ircontrol is the python script to send and receive infrared data and it store infrared data in persistent storage.
 
 **e.g.**
 
@@ -41,31 +61,56 @@ Set the paths to customizable variable.
 # homebridge-cmd4 state script on node.js
 STATE_INTPRT = "node"
 STATE_SCRIPT = "/var/lib/homebridge/Cmd4Scripts/State.js"
-# adrsir script on python3
+# adrsirlib script on python3
 IRCONTROL = "/usr/local/etc/adrsirlib/ircontrol"
 ```
 
-## Redesign send_irdata function
+## Redesign send_irdata() function
 
-Redesign send_irdata function for your devices you join apple home network.
-Determine events you dispatch, program event handler which controls your devices.
-
-**e.g.**
+### Function signature is here:
 
 ```python3:cmd4_adrsir.py
-if device == "CeilingFan":
-    if action == "On":
-        # On atteribute is associate true or false
-        irdata = "ceiling_fan_power"
+def send_irdata(device, action, next):
+```
+- device: value of "displayName" attribute. It is NOT "name".
+- action: attribute in element of accessories attribute array.
+- next: next device state of `action` attribute.
+
+### Implementation
+
+You should implement the following behavior for your preference and environment:
+1. choose the name of infrared data of stored from the device states.
+1. Set the name in `irdata` variable. 
+
+Finally, this function send `irdata` as infrared data, move the device state to next.
+
+**e.g.**
+```python3:cmd4_adrsir.py
+    if device == "BrightLight":
+
+        if action == "On":
+            bright = exec_state_stript("Get", device, "Brightness")
+            irdata = select_light_name(next, bright, "brightlight")
+        elif action == "Brightness":
+            on = exec_state_stript("Get", device, "On")
+            irdata = select_light_name(on, next, "brightlight")
 ```
 
 # Thanks
-## adrsirlib : https://github.com/tokieng/adrsirlib
-Great and helpful python script. 
+## adrsirlib
+tokieng created the python script which great and helpful.
 
-I have a trouble. Provided useless official scripts and no support. 
+[Bit Trade One, LTD.](https://bit-trade-one.co.jp) provided useless scripts and no supports. 
 
-But I found adrsirlib and am happy.
+But I am happy to have found adrsirlib now.
 
-## Homebridges-cmd4 : https://github.com/ztalbot2000/homebridge-cmd4
-Better homebridge plugin, I want more documentations and examples.
+[tokieng's GitHub page is here.][adrsirlib]
+
+
+## Homebridges-cmd4
+
+ztalbot2000 provide me better homebridge plugin.
+
+I hope that ztalbot2000 provides documentations and examples of comebridges-cmd4 more.
+
+[ztalbot2000's GitHub page is here.][Homebridges-cmd4]
