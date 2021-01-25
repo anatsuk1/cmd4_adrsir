@@ -49,51 +49,54 @@ Set environment dependent commands in below Variables.
 
 |Variable|Description
 |:-----------|:------------
-|STATE_INTPRT|path to the node command
-|STATE_SCRIPT|path to `State.js` file contained in Homebridges-cmd4
 |IRCONTROL|path to `ircontrol` script file contained in adrsirlib
 
-ircontrol is the python script to send and receive infrared data and it store infrared data in persistent storage.
+`ircontrol` is the python script to send and receive infrared data and it store infrared data in persistent storage.
 
 **e.g.**
 
 ```python3:cmd4_adrsir.py
-# homebridge-cmd4 state script on node.js
-STATE_INTPRT = "node"
-STATE_SCRIPT = "/var/lib/homebridge/Cmd4Scripts/State.js"
+#
+# Modify script location
+#
 # adrsirlib script on python3
 IRCONTROL = "/usr/local/etc/adrsirlib/ircontrol"
 ```
 
-## Redesign send_irdata() function
+## Redesign choose_data_name() function
 
 ### Function signature is here:
 
 ```python3:cmd4_adrsir.py
-def send_irdata(device, action, next):
+def choose_data_name(state, interaction, level):
 ```
-- device: value of "displayName" attribute. It is NOT "name".
-- action: attribute in element of accessories attribute array.
-- next: next device state of `action` attribute.
+- `state`:  is value of "displayName" attribute.  
+It is NOT "name" attribute. "displayName" is attribute name on config.json in homebridge.
+- `interaction`: is name of attribute which is bound to user interaction.  
+First charactor of the name is UPPERCASE.
+- `level`: is value of `interaction` attribute.
 
 ### Implementation
 
 You should implement the following behavior for your preference and environment:
 1. choose the name of infrared data of stored from the device states.
-1. Set the name in `irdata` variable. 
+1. Set the name in `data_name` variable as return value. 
 
-Finally, this function send `irdata` as infrared data, move the device state to next.
+cmd4_adrsir sends infrared data bind for `data_name`, and moves the device state to `level`
 
 **e.g.**
 ```python3:cmd4_adrsir.py
-    if device == "BrightLight":
+    elif device == "AirConditioner":
 
-        if action == "On":
-            bright = exec_state_stript("Get", device, "Brightness")
-            irdata = select_light_name(next, bright, "brightlight")
-        elif action == "Brightness":
-            on = exec_state_stript("Get", device, "On")
-            irdata = select_light_name(on, next, "brightlight")
+        active = state.get_value("active")
+        heater_cooler = state.get_value("targetHeaterCoolerState")
+
+        if interaction == "active":
+            active = level
+        elif interaction == "targetHeaterCoolerState":
+            heater_cooler = level
+
+        data_name = select_aircon_name(active, heater_cooler)
 ```
 
 # Thanks

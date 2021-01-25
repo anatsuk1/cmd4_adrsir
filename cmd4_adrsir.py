@@ -5,192 +5,286 @@
 #
 # BSD 2-Clause License
 
-import subprocess
+import os
 import sys
 import time, datetime
+import subprocess
 import fcntl
+import json
+
+#
+# Modify script location
+#
+# adrsirlib script on python3
+IRCONTROL = "/usr/local/etc/adrsirlib/ircontrol"
 
 # For debug
 DEBUG = False
-
-#
-# Modify interpreter and script location
-#
 LOG_FILE = "/home/pi/log.txt"
 
-# Lock for Processes
-LOCK_FILE = "/var/lib/homebridge/process.lock"
+# The directory of this script stored.
+DIRNAME = os.path.dirname(__file__)
 
-# homebridge-cmd4 state script on node.js
-STATE_INTPRT = "node"
-STATE_SCRIPT = "/var/lib/homebridge/Cmd4Scripts/State.js"
-# adrsirlib script on python3
-IRCONTROL = "/usr/local/etc/adrsirlib/ircontrol"
+# Persistant States of devices.
+STATE_FILE = DIRNAME + "/state.json"
+
+# Lock for Processes
+LOCK_FILE = DIRNAME + "/process.lock"
+
+# read config.json for get default value.
+# config.json must contain "platforms" attribute.
+# "platforms" must contain "platform" attribute with "Cmd4" as `"platform": "Cmd4"`.
+# See config.json commited with this script.
+CONFIG_JSON_FILE = DIRNAME + "/config.json"
+
+#
+# Implimentation of class
+#
+class DeviceState:
+
+    def __init__(self, file_name, device):
+
+        # use state including device if loading json is failed
+        state = {device:{}}
+
+        # load state from the state file.
+        # create device dictionary in state dictionary if not exist
+        try:
+            with open(file_name, mode="r") as state_file:
+                state = json.load(state_file)
+
+            # add device entry if not exist
+            state.setdefault(device, {})
+
+        except (json.JSONDecodeError, FileNotFoundError) as error:
+            debug_print(sys._getframe().f_code.co_name + " Failed JSON load : {}", error)
+
+        debug_print(sys._getframe().f_code.co_name + " : {}", state)
+
+        self.state = state
+        self.file_name = file_name
+        self.device = device
+
+    def __del__ (self):
+        # save(self)
+        pass
+
+    def save(self):
+        with open(self.file_name, mode="w") as state_file:
+            json.dump(self.state, state_file)
+
+    def get_device(self):
+        return self.device
+
+    def get_state(self):
+        return self.state[self.device]
+
+    def get_value(self, attribute):
+
+        # Get default the value from config.json
+        if attribute not in self.state[self.device].keys():
+            with open(CONFIG_JSON_FILE, mode="r") as config:
+                config_values = json.load(config)
+
+            platforms = config_values["platforms"]
+            for platform in platforms:
+                if "Cmd4" == platform["platform"]:
+                    accessories = platform["accessories"]
+                    for accessory in accessories:
+                        if self.device == accessory["displayName"]:
+                            self.state[self.device][attribute] = accessory[attribute]
+                            debug_print(sys._getframe().f_code.co_name + " initial value: {}", accessory[attribute])
+
+        value = self.state[self.device][attribute]
+
+        return value
+
+    def set_value(self, attribute, value):
+
+        debug_print(sys._getframe().f_code.co_name + ": {} {}", attribute, value)
+
+        self.state[self.device][attribute] = value
 
 #
 # Implimentation of functions 
 #
-def exec_state_stript(direction, device, action, param=""):
+# for debug
+def debug_print(formatted_string, *args):
 
-    # Get the state of devices from homebridge-cmd4 state script.
-    # Prepare argument to shift right for run script. 
-    command = [STATE_INTPRT, STATE_SCRIPT, direction, device, action, param]
-
-    result = subprocess.run(command, encoding="utf-8", stdout=subprocess.PIPE)
-    current = result.stdout.strip()
-    current = current.strip("\"");
-
-    # for debug
     if DEBUG:
         with open(LOG_FILE, mode="a") as log:
-            print("[{}] State Result {}: {}".format(datetime.datetime.now().timetz(),
-                    command[2:], current), file=log)
-    return current
+            # additional date header
+            header = "[{}]".format(datetime.datetime.now().timetz())
+            body = formatted_string.format(*args)
+            print(header + body, file=log)
 
 def select_light_name(on_str, bright_str, name_prefix):
 
-    irdata = None
-    on_value = on_str.upper()
+    debug_print(sys._getframe().f_code.co_name + ": {}, {}, {}", on_str, bright_str, name_prefix)
+
+    light_name = None
+    on = on_str.upper() # to make sure calling upper()
     bright = int(bright_str)
 
     # On atteribute is true
-    if on_value == "TRUE":
+    if on == "TRUE":
 
         # Bright 100% ir data
         if bright == 100:
-            irdata = name_prefix + "_full"
+            light_name = name_prefix + "_full"
 
         # off ir data
         elif bright == 0:
-            irdata = name_prefix + "_off"
+            light_name = name_prefix + "_off"
 
         # Bright night ir data
         elif bright <= 20:
-            irdata = name_prefix + "_night"
+            light_name = name_prefix + "_night"
 
         # Bright xx%(prefered).
         # 20% < prefered bright < 100%
         else:
-            irdata = name_prefix + "_preference"
+            light_name = name_prefix + "_preference"
 
     # On atteribute is false
-    elif on_str == "FALSE":
-        irdata = name_prefix + "_off"
+    elif on == "FALSE":
+        light_name = name_prefix + "_off"
     
-    return irdata
+    return light_name
 
 def select_aircon_name(active_str, heater_cooler_str):
 
-    irdata = None
-    active = active_str.upper()
-    heater_cooler = heater_cooler_str.upper()
+    debug_print(sys._getframe().f_code.co_name + ": {}, {}", active_str, heater_cooler_str)
+
+    aircon_name = None
+    active = active_str.upper() # to make sure calling upper()
+    heater_cooler = heater_cooler_str.upper() #  to make sure calling upper()
 
     # INACTIVE
     if active == "INACTIVE":
-        irdata = "aircon_off"
+        aircon_name = "aircon_off"
     # ACTIVE
     elif active == "ACTIVE":
         # AUTO, if INACTIVE or IDLE comes, perhaps cmd4 is in bug
-        if heater_cooler == "AUTO" or heater_cooler == "INACTIVE" or heater_cooler ==  "IDLE":
-            irdata = "aircon_off"
+        if heater_cooler == "AUTO" or \
+                heater_cooler == "INACTIVE" or \
+                heater_cooler == "IDLE":
+            aircon_name = "aircon_off"
         # HEAT
         elif heater_cooler == "HEAT":
-            irdata = "aircon_warm-22-auto"
+            aircon_name = "aircon_warm-22-auto"
         # COOL
         elif heater_cooler == "COOL":
-            irdata = "aircon_cool-26-auto"
+            aircon_name = "aircon_cool-26-auto"
 
-    return irdata
+    return aircon_name
 
-def send_irdata(device, action, next):
+def choose_data_name(state, interaction, level):
 
-    irdata = None
+    debug_print(sys._getframe().f_code.co_name + ": {}, {}, {}", state, interaction, level)
+
+    data_name = None
 
     # Note: device is "displayName". It is NOT "name".
- 
-    if device == "BrightLight":
+    device = state.get_device()
 
-        if action == "On":
-            bright = exec_state_stript("Get", device, "Brightness")
-            irdata = select_light_name(next, bright, "brightlight")
-        elif action == "Brightness":
-            on = exec_state_stript("Get", device, "On")
-            irdata = select_light_name(on, next, "brightlight")
+    if device == "BrightLight" or \
+            device == "DimLight":
 
-    elif device == "DimLight":
+        # next device state
+        on = state.get_value("on")
+        bright = state.get_value("brightness")
 
-        if action == "On":
-            bright = exec_state_stript("Get", device, "Brightness")
-            irdata = select_light_name(next, bright, "dimlight")
-        elif action == "Brightness":
-            on = exec_state_stript("Get", device, "On")
-            irdata = select_light_name(on, next, "dimlight")
+        if interaction == "on":
+            on = level
+        elif interaction == "brightness":
+            bright = level
+
+        # design start filename with lower device name.
+        lower_device = device.lower()
+
+        data_name = select_light_name(on, bright, lower_device)
 
     elif device == "AirConditioner":
 
-        if action == "Active":
+        active = state.get_value("active")
+        heater_cooler = state.get_value("targetHeaterCoolerState")
 
-            heater_cooler = exec_state_stript("Get", device, "TargetHeaterCoolerState")
-            irdata = select_aircon_name(next, heater_cooler)
+        if interaction == "active":
+            active = level
+        elif interaction == "targetHeaterCoolerState":
+            heater_cooler = level
 
-        elif action == "TargetHeaterCoolerState":
-            active = exec_state_stript("Get", device, "Active")
-            irdata = select_aircon_name(active, next)
+        data_name = select_aircon_name(active, heater_cooler)
+
+    return data_name
+
+def send_infrared_data(data_name):
 
     # Run ircontrol command like as "<location>/ircontrol <option> <ir data name>".
     # e.g. $ /usr/local/etc/adrsirlib/ircontrol send brightlight_preference
-    if irdata is not None:
-        subprocess.run([IRCONTROL, "send", irdata])
+    if data_name is not None:
+        subprocess.run([IRCONTROL, "send", data_name])
 
-    if DEBUG:
-        with open(LOG_FILE, mode="a") as log:
-            print("[{}]IrCommand: {} {} {}".format(datetime.datetime.now().timetz(), 
-                    IRCONTROL, "send", irdata), file=log)
+    debug_print("IRCONTROL: {} {} {}", IRCONTROL, "send", data_name)
 
 def start_process(value):
 
-    # for debug
-    if DEBUG:
-        with open(LOG_FILE, mode="a") as log:
-            print("[{}]Cmd Argv: {}".format(datetime.datetime.now().timetz(),
-                    value), file=log)
+    debug_print(sys._getframe().f_code.co_name + ": {}", value)
 
     # Depend on adrsirlib and homebridge-cmd4 state script.
     # ./ircontrol script with SEND command and stored ir data.
 
-    # value[1]: "Set", "Get"
+    # value[1]: is "Set" or "Get".
     # value[2]: is value of "displayName" attribute. It is NOT "name" attribute.
-    #           "displayName" is attribute name on config.json in homebridge, defined by homebridge-cmd4.
-    # value[3]: user choiced attribute with maybe upper case.
-    # value[4]: only if value[1] is "Set", numeric value of value[3] attribute. overwise nothing.
+    #           "displayName" is attribute name on config.json in homebridge.
+    #           homebridge-cmd4 use "displayName" in wrong.
+    # value[3]: is name of attribute which is bound to user interaction.
+    #           First charactor of the name is UPPERCASE.
+    #           homebridge-cmd4 converts the character to uppercase in wrong.
+    # value[4]: is value of value[3] attribute if value[1] is "Set", otherwise nothing.
+    direction = value[1]
+    device = value[2]
+    interaction = value[3][0].lower() + value[3][1:]
+    level = value[4] if direction == "Set" else None
 
-    if value[1] == "Set":
+    state = DeviceState(STATE_FILE, device)
 
-        current = exec_state_stript(value[1], value[2], value[3], value[4])
+    if direction == "Set":
 
-        # Simulate current state, When set target state, set current state in the same time.
-        if value[3] == "TargetHeaterCoolerState":
-            if value[4].upper() != "AUTO":
-                exec_state_stript(value[1], value[2], "CurrentHeaterCoolerState", value[4])
+        # choose infrared data.
+        name = choose_data_name(state, interaction, level)
 
-        # send ir data.
-        send_irdata(value[2], value[3], value[4])
+        debug_print(sys._getframe().f_code.co_name + ": check name: {}, state: {}", name, state.get_state())
 
+        # send infrared data.
+        send_infrared_data(name)
 
+        # store state as value of attribute
+        state.set_value(interaction, level)
 
-    elif value[1] == "Get":
+        # Simulate current state.
+        # When set target state, set current state in the same time.
+        if interaction == "targetHeaterCoolerState":
+            if level != "AUTO":
+                state.set_value("currentHeaterCoolerState", level)
 
-        current = exec_state_stript(value[1], value[2], value[3], "dummy")
+    result = state.get_value(interaction)
 
-    print(current)
+    # save state in persistent storage.
+    state.save()
+
+    # the level of interaction to stdout
+    # CMD4 recieves the level from stdout
+    print(result)
+
+    debug_print("End with: {}", result)
 
 if __name__ == "__main__":
 
     # for debug
     if False:
-        with open(LOG_FILE, mode="a") as log:
-            print("[{}]sys.argv: {}".format(datetime.datetime.now().timetz(),
-                    sys.argv), file=log)
+        debug_print("Start with: {}", sys.argv)
 
     with open(LOCK_FILE, "r") as lock_file:
         fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
