@@ -90,13 +90,16 @@ cmd4_adrsir sends infrared data bind for `data_name`, and moves the device state
 
         active = state.get_value("active")
         heater_cooler = state.get_value("targetHeaterCoolerState")
+        next_active = active
+        next_heater_cooler = heater_cooler
 
         if interaction == "active":
-            active = level
+            next_active = level
         elif interaction == "targetHeaterCoolerState":
-            heater_cooler = level
+            next_heater_cooler = level
 
-        data_name = select_aircon_name(active, heater_cooler)
+        if active != next_active or heater_cooler != next_heater_cooler:
+            data_name = select_aircon_name(next_active, next_heater_cooler)
 ```
 
 # Thanks

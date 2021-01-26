@@ -3,6 +3,12 @@
 echo "Copy cmd4_adrsir.py to /var/lib/homebridge/"
 cp ./cmd4_adrsir.py /var/lib/homebridge/
 
+echo "Copy logger.py to /var/lib/homebridge/"
+cp ./logger.py /var/lib/homebridge/
+
+echo "Copy logger.py to /var/lib/homebridge/"
+cp ./device_state.py /var/lib/homebridge/
+
 echo "Copy config.json to /var/lib/homebridge/"
 cp ./config.json /var/lib/homebridge/
 

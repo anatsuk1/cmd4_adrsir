@@ -7,11 +7,12 @@
 
 import os
 import sys
-import time, datetime
+import time
 import subprocess
 import fcntl
-import json
 
+from logger import Logger
+from device_state import DeviceState
 #
 # Modify script location
 #
@@ -19,7 +20,7 @@ import json
 IRCONTROL = "/usr/local/etc/adrsirlib/ircontrol"
 
 # For debug
-DEBUG = False
+LOG_LEVEL = Logger.OFF
 LOG_FILE = "/home/pi/log.txt"
 
 # The directory of this script stored.
@@ -34,93 +35,17 @@ LOCK_FILE = DIRNAME + "/process.lock"
 # read config.json for get default value.
 # config.json must contain "platforms" attribute.
 # "platforms" must contain "platform" attribute with "Cmd4" as `"platform": "Cmd4"`.
-# See config.json commited with this script.
+# See more infomation read config.json.
 CONFIG_JSON_FILE = DIRNAME + "/config.json"
 
 #
 # Implimentation of class
 #
-class DeviceState:
 
-    def __init__(self, file_name, device):
-
-        # use state including device if loading json is failed
-        state = {device:{}}
-
-        # load state from the state file.
-        # create device dictionary in state dictionary if not exist
-        try:
-            with open(file_name, mode="r") as state_file:
-                state = json.load(state_file)
-
-            # add device entry if not exist
-            state.setdefault(device, {})
-
-        except (json.JSONDecodeError, FileNotFoundError) as error:
-            debug_print(sys._getframe().f_code.co_name + " Failed JSON load : {}", error)
-
-        debug_print(sys._getframe().f_code.co_name + " : {}", state)
-
-        self.state = state
-        self.file_name = file_name
-        self.device = device
-
-    def __del__ (self):
-        # save(self)
-        pass
-
-    def save(self):
-        with open(self.file_name, mode="w") as state_file:
-            json.dump(self.state, state_file)
-
-    def get_device(self):
-        return self.device
-
-    def get_state(self):
-        return self.state[self.device]
-
-    def get_value(self, attribute):
-
-        # Get default the value from config.json
-        if attribute not in self.state[self.device].keys():
-            with open(CONFIG_JSON_FILE, mode="r") as config:
-                config_values = json.load(config)
-
-            platforms = config_values["platforms"]
-            for platform in platforms:
-                if "Cmd4" == platform["platform"]:
-                    accessories = platform["accessories"]
-                    for accessory in accessories:
-                        if self.device == accessory["displayName"]:
-                            self.state[self.device][attribute] = accessory[attribute]
-                            debug_print(sys._getframe().f_code.co_name + " initial value: {}", accessory[attribute])
-
-        value = self.state[self.device][attribute]
-
-        return value
-
-    def set_value(self, attribute, value):
-
-        debug_print(sys._getframe().f_code.co_name + ": {} {}", attribute, value)
-
-        self.state[self.device][attribute] = value
-
-#
-# Implimentation of functions 
-#
-# for debug
-def debug_print(formatted_string, *args):
-
-    if DEBUG:
-        with open(LOG_FILE, mode="a") as log:
-            # additional date header
-            header = "[{}]".format(datetime.datetime.now().timetz())
-            body = formatted_string.format(*args)
-            print(header + body, file=log)
 
 def select_light_name(on_str, bright_str, name_prefix):
 
-    debug_print(sys._getframe().f_code.co_name + ": {}, {}, {}", on_str, bright_str, name_prefix)
+    Logger.debug_print_trace(sys._getframe().f_code.co_name + ": {}, {}, {}", on_str, bright_str, name_prefix)
 
     light_name = None
     on = on_str.upper() # to make sure calling upper()
@@ -152,9 +77,10 @@ def select_light_name(on_str, bright_str, name_prefix):
     
     return light_name
 
+
 def select_aircon_name(active_str, heater_cooler_str):
 
-    debug_print(sys._getframe().f_code.co_name + ": {}, {}", active_str, heater_cooler_str)
+    Logger.debug_print_trace(sys._getframe().f_code.co_name + ": {}, {}", active_str, heater_cooler_str)
 
     aircon_name = None
     active = active_str.upper() # to make sure calling upper()
@@ -179,9 +105,10 @@ def select_aircon_name(active_str, heater_cooler_str):
 
     return aircon_name
 
+
 def choose_data_name(state, interaction, level):
 
-    debug_print(sys._getframe().f_code.co_name + ": {}, {}, {}", state, interaction, level)
+    Logger.debug_print_trace(sys._getframe().f_code.co_name + ": {}, {}, {}", state, interaction, level)
 
     data_name = None
 
@@ -191,49 +118,59 @@ def choose_data_name(state, interaction, level):
     if device == "BrightLight" or \
             device == "DimLight":
 
-        # next device state
+        # current device state
         on = state.get_value("on")
         bright = state.get_value("brightness")
+        next_on = on
+        next_bright = bright
 
+        # next device state
         if interaction == "on":
-            on = level
+            next_on = level
         elif interaction == "brightness":
-            bright = level
+            next_bright = level
 
-        # design start filename with lower device name.
-        lower_device = device.lower()
-
-        data_name = select_light_name(on, bright, lower_device)
+        if on != next_on or bright != next_bright:
+            # design that data name constains only lower device name.
+            lower_device = device.lower()
+            data_name = select_light_name(next_on, next_bright, lower_device)
 
     elif device == "AirConditioner":
 
         active = state.get_value("active")
         heater_cooler = state.get_value("targetHeaterCoolerState")
+        next_active = active
+        next_heater_cooler = heater_cooler
 
         if interaction == "active":
-            active = level
+            next_active = level
         elif interaction == "targetHeaterCoolerState":
-            heater_cooler = level
+            next_heater_cooler = level
 
-        data_name = select_aircon_name(active, heater_cooler)
+        if active != next_active or heater_cooler != next_heater_cooler:
+            data_name = select_aircon_name(next_active, next_heater_cooler)
 
     return data_name
 
+
 def send_infrared_data(data_name):
 
-    # Run ircontrol command like as "<location>/ircontrol <option> <ir data name>".
+    # launch ircontrol command like as "<location>/ircontrol <option> <infrared data name>".
     # e.g. $ /usr/local/etc/adrsirlib/ircontrol send brightlight_preference
     if data_name is not None:
         subprocess.run([IRCONTROL, "send", data_name])
+        # for sending next, waiting 300 ms after sending infrared data
+        time.sleep(0.3)
 
-    debug_print("IRCONTROL: {} {} {}", IRCONTROL, "send", data_name)
+    Logger.debug_print_info("IRCONTROL: {} {} {}", IRCONTROL, "send", data_name)
+
 
 def start_process(value):
 
-    debug_print(sys._getframe().f_code.co_name + ": {}", value)
+    Logger.debug_print_info(sys._getframe().f_code.co_name + " IN: {}", value)
 
-    # Depend on adrsirlib and homebridge-cmd4 state script.
-    # ./ircontrol script with SEND command and stored ir data.
+    # Depend on adrsirlib and the specification required on state_cmd of homebridge-cmd4.
+    # calling ./ircontrol contained in adrsirlib, see more comments on send_infrared_data().
 
     # value[1]: is "Set" or "Get".
     # value[2]: is value of "displayName" attribute. It is NOT "name" attribute.
@@ -255,8 +192,6 @@ def start_process(value):
         # choose infrared data.
         name = choose_data_name(state, interaction, level)
 
-        debug_print(sys._getframe().f_code.co_name + ": check name: {}, state: {}", name, state.get_state())
-
         # send infrared data.
         send_infrared_data(name)
 
@@ -274,17 +209,20 @@ def start_process(value):
     # save state in persistent storage.
     state.save()
 
-    # the level of interaction to stdout
-    # CMD4 recieves the level from stdout
+    # put the level of interaction to stdout
+    # Cmd4 retrives the level from stdout
     print(result)
 
-    debug_print("End with: {}", result)
+    Logger.debug_print_info(sys._getframe().f_code.co_name + " OUT: {}", result)
 
 if __name__ == "__main__":
 
+    Logger.initialize(LOG_FILE, LOG_LEVEL)
+    DeviceState.initialize(CONFIG_JSON_FILE)
+
     # for debug
     if False:
-        debug_print("Start with: {}", sys.argv)
+        Logger.debug_print_info("Start with: {}", sys.argv)
 
     with open(LOCK_FILE, "r") as lock_file:
         fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
