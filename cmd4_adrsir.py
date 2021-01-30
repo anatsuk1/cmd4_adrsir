@@ -160,7 +160,7 @@ def send_infrared_data(data_name):
     if data_name is not None:
         subprocess.run([IRCONTROL, "send", data_name])
         # for sending next, waiting 300 ms after sending infrared data
-        time.sleep(0.3)
+        time.sleep(0.4)
 
     Logger.debug_print_info("IRCONTROL: {} {} {}", IRCONTROL, "send", data_name)
 
@@ -203,17 +203,21 @@ def start_process(value):
         if interaction == "targetHeaterCoolerState":
             if level != "AUTO":
                 state.set_value("currentHeaterCoolerState", level)
+        
+        # Cmd4 retrieves the result of processing from stdout
+        # 0 means success.
+        print(0)
 
-    result = state.get_value(interaction)
+    elif direction == "Get":
+
+        # put the level of interaction to stdout
+        # Cmd4 retrieves the level from stdout
+        print(state.get_value(interaction))
 
     # save state in persistent storage.
     state.save()
 
-    # put the level of interaction to stdout
-    # Cmd4 retrives the level from stdout
-    print(result)
-
-    Logger.debug_print_info(sys._getframe().f_code.co_name + " OUT: {}", result)
+    Logger.debug_print_info(sys._getframe().f_code.co_name + " OUT: {}", state.get_value(interaction))
 
 if __name__ == "__main__":
 
