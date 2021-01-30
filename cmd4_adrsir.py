@@ -13,8 +13,9 @@ import fcntl
 
 from logger import Logger
 from device_state import DeviceState
+
 #
-# Modify script location
+# Configure
 #
 # adrsirlib script on python3
 IRCONTROL = "/usr/local/etc/adrsirlib/ircontrol"
@@ -26,10 +27,10 @@ LOG_FILE = "/home/pi/log.txt"
 # The directory of this script stored.
 DIRNAME = os.path.dirname(__file__)
 
-# Persistant States of devices.
+# Persistant states of devices.
 STATE_FILE = DIRNAME + "/state.json"
 
-# Lock for Processes
+# Lock for processes
 LOCK_FILE = DIRNAME + "/process.lock"
 
 # read config.json for get default value.
@@ -39,10 +40,8 @@ LOCK_FILE = DIRNAME + "/process.lock"
 CONFIG_JSON_FILE = DIRNAME + "/config.json"
 
 #
-# Implimentation of class
+# Implimentation of functions
 #
-
-
 def select_light_name(on_str, bright_str, name_prefix):
 
     Logger.debug_print_trace(sys._getframe().f_code.co_name + ": {}, {}, {}", on_str, bright_str, name_prefix)
@@ -157,6 +156,7 @@ def send_infrared_data(data_name):
 
     # launch ircontrol command like as "<location>/ircontrol <option> <infrared data name>".
     # e.g. $ /usr/local/etc/adrsirlib/ircontrol send brightlight_preference
+
     if data_name is not None:
         subprocess.run([IRCONTROL, "send", data_name])
         # for sending next, waiting 300 ms after sending infrared data
@@ -168,6 +168,8 @@ def send_infrared_data(data_name):
 def start_process(value):
 
     Logger.debug_print_info(sys._getframe().f_code.co_name + " IN: {}", value)
+
+    DeviceState.initialize(CONFIG_JSON_FILE)
 
     # Depend on adrsirlib and the specification required on state_cmd of homebridge-cmd4.
     # calling ./ircontrol contained in adrsirlib, see more comments on send_infrared_data().
@@ -222,7 +224,6 @@ def start_process(value):
 if __name__ == "__main__":
 
     Logger.initialize(LOG_FILE, LOG_LEVEL)
-    DeviceState.initialize(CONFIG_JSON_FILE)
 
     # for debug
     if False:
