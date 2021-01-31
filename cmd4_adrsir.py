@@ -21,7 +21,7 @@ from device_state import DeviceState
 IRCONTROL = "/usr/local/etc/adrsirlib/ircontrol"
 
 # For debug
-LOG_LEVEL = Logger.INFO
+LOG_LEVEL = Logger.OFF
 LOG_FILE = "/home/pi/log.txt"
 
 # The directory of this script stored.
