@@ -21,7 +21,7 @@ from device_state import DeviceState
 IRCONTROL = "/usr/local/etc/adrsirlib/ircontrol"
 
 # For debug
-LOG_LEVEL = Logger.OFF
+LOG_LEVEL = Logger.INFO
 LOG_FILE = "/home/pi/log.txt"
 
 # The directory of this script stored.
@@ -159,8 +159,8 @@ def send_infrared_data(data_name):
 
     if data_name is not None:
         subprocess.run([IRCONTROL, "send", data_name])
-        # for sending next, waiting 300 ms after sending infrared data
-        time.sleep(0.4)
+        # for sending next, waiting 1 s after sending infrared data
+        time.sleep(1)
 
     Logger.debug_print_info("IRCONTROL: {} {} {}", IRCONTROL, "send", data_name)
 
