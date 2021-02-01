@@ -92,3 +92,6 @@ class DeviceState:
                 current_arribute = "currentHeaterCoolerState"
                 self.state[self.device][current_arribute] = value
                 Logger.debug_print_info(sys._getframe().f_code.co_name + " current state changed: {} {}", current_arribute, value)
+
+if __name__ == "__main__":
+    print("Import module.") 
