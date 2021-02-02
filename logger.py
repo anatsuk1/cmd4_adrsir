@@ -34,6 +34,10 @@ class Logger:
             print(header + body, file=log)
 
     @classmethod
+    def debug_print_error(cls, formatted_string, *args):
+        cls.debug_print(cls.ERROR, formatted_string, *args)
+
+    @classmethod
     def debug_print_info(cls, formatted_string, *args):
         cls.debug_print(cls.INFO, formatted_string, *args)
 
