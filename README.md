@@ -3,7 +3,7 @@
 [adrsirlib]: https://github.com/tokieng/adrsirlib
 [homebridges-cmd4]: https://github.com/ztalbot2000/homebridge-cmd4
 
-The cmd4_adrsir is to select and send ir data, written in Python 3.7(perhaps 3.0 or latar).
+The cmd4_adrsir is to select and send ir data, written in Python 3.7(perhaps 3.5 or latar).
 
 `cmd4_adrsir` launchs [adrsirlib][adrsirlib], just fit to value of state_cmd attribute of [homebridges-cmd4][homebridges-cmd4].
 
@@ -57,7 +57,7 @@ Set environment dependent commands in below Variables.
 
 ```python3:cmd4_adrsir.py
 #
-# Modify script location
+# Configure
 #
 # adrsirlib script on python3
 IRCONTROL = "/usr/local/etc/adrsirlib/ircontrol"
@@ -72,7 +72,7 @@ def choose_data_name(state, interaction, level):
 ```
 - `state`:  is value of "displayName" attribute.  
 It is NOT "name" attribute. "displayName" is attribute name on config.json in homebridge.
-- `interaction`: is name of attribute which is bound to user interaction.  
+- `interaction`: is name of attribute which is bound for user interaction.  
 First charactor of the name is UPPERCASE.
 - `level`: is value of `interaction` attribute.
 
