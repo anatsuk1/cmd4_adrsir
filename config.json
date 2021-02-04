@@ -32,7 +32,7 @@
       {
          "platform": "Cmd4",
          "name": "Cmd4",
-         "outputConstants": false,
+         "outputConstants": true,
          "restartRecover": false,
          "accessories" : [
             {

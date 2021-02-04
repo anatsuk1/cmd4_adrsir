@@ -125,5 +125,5 @@ I hope that ztalbot2000 provides documentations and examples of Homebridges-cmd4
 
 cmd4_adrsir is running but not limited with the followings.
 - Python 3.7.3
-- Homebridges-cmd4 3.0.7
-- Homebridge 1.2.5
+- Homebridges-cmd4 3.0.15
+- Homebridge 1.1.7
