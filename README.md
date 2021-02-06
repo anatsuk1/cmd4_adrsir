@@ -13,20 +13,24 @@ Describe the path to `cmd_adrsir` stored in **state_cmd** attribute in `config.j
 An example for description is here:
 
 **e.g.**
-```
-    {
-        "type": "Lightbulb",
-        "displayName": "BrightLight",
-        "on": "FALSE",
-        "brightness": 0,
-        "colorTemperature": 0,
-        "name": "BrightLight",
-        "Manufacturer": "Panasonic",
-        "Model": "Cmd4 model",
-        "SerialNumber": "anatsuk1",
-        "stateChangeResponseTime": 1,
-        "state_cmd": "/var/lib/homebridge/cmd4_adrsir.py"
-    },
+```javascript:config.json
+{
+    "type": "HeaterCooler",
+    "displayName": "AirConditioner",
+    "name": "AirConditioner",
+    "temperatureDisplayUnits": "CELSIUS",
+    "active": "Inactive",
+    "currentHeaterCoolerState": "INACTIVE",
+    "targetHeaterCoolerState": "AUTO",
+    "currentTemperature": 20.0,
+    "coolingThresholdTemperature": 35,
+    "heatingThresholdTemperature": 25,
+    "Manufacturer": "MITSUBISHI",
+    "Model": "Cmd4 model",
+    "SerialNumber": "anatsuk1",
+    "stateChangeResponseTime": 1,
+    "state_cmd": "/var/lib/homebridge/cmd4_adrsir.py"
+}
 ```
 
 # Port cmd4_adrsir to your environment
@@ -40,7 +44,7 @@ The present both files are for my environment and preference.
 
 Describe the path to `cmd_adrsir` stored in **state_cmd** attribute in `config.json`
 
-```
+```javascript:config.json
 "state_cmd": "/var/lib/homebridge/cmd4_adrsir.py"
 ```
 
@@ -72,9 +76,9 @@ def choose_data_name(state, interaction, level):
 ```
 - `state`:  is value of "displayName" attribute.  
 It is NOT "name" attribute. "displayName" is attribute name on config.json in homebridge.
-- `interaction`: is name of attribute which is bound for user interaction.  
+- `interaction`: is the name of attribute which is bound for user interaction.  
 First charactor of the name is UPPERCASE.
-- `level`: is value of `interaction` attribute.
+- `level`: is the value of `interaction` attribute.
 
 ### Implementation
 
@@ -82,7 +86,7 @@ You should implement the following behavior for your preference and environment:
 1. choose the name of infrared data of stored from the device states.
 1. Set the name in `data_name` variable as return value. 
 
-cmd4_adrsir sends infrared data bind for `data_name`, and moves the device state to `level`
+cmd4_adrsir sends infrared data binding for `data_name`, and moves the device state into `level`.
 
 **e.g.**
 ```python3:cmd4_adrsir.py
@@ -105,24 +109,20 @@ cmd4_adrsir sends infrared data bind for `data_name`, and moves the device state
 # Thanks
 ## adrsirlib
 @tokieng created the python script which great and helpful.
-
-[Bit Trade One, LTD.(ADRSIR design, manufacturing and sales)](https://bit-trade-one.co.jp) provided useless scripts and no supports. 
-
-But I am happy to have found adrsirlib now.
-
+So, I am happy to have found adrsirlib now.
 [tokieng's GitHub page is here.][adrsirlib]
 
-
 ## Homebridges-cmd4
-
 @ztalbot2000 provide me better homebridge plugin.
 
 I hope that ztalbot2000 provides documentations and examples of Homebridges-cmd4 more.
 
 [ztalbot2000's GitHub page is here.][Homebridges-cmd4]
 
-# Environment
+# No Thanks
+[Bit Trade One, LTD.(ADRSIR design, manufacturing and sales)](https://bit-trade-one.co.jp) provides USELESS scripts and NO support.
 
+# Environment
 cmd4_adrsir is running but not limited with the followings.
 - Python 3.7.3
 - Homebridges-cmd4 3.0.15
