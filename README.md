@@ -76,8 +76,8 @@ IRCONTROL = "/usr/local/etc/adrsirlib/ircontrol"
 ```python3:cmd4_adrsir.py
 def choose_data_name(state, interaction, level):
 ```
-- `state`: is DeviceState class which contains the device, the value of "displayName" attribute, and the curret State of it.  
-  **Notice**: It is NOT "name" but "displayName" attribute.
+- `state`: is an instance of DeviceState class which contains the device and the current state of it.  
+  **Notice**: The device is the value "displayName" attribute NOT "name" attribute.
 - `interaction`: is the name of attribute which is bound for user interaction.  
 First charactor of the name is UPPERCASE.
 - `level`: is the value of `interaction` attribute.
@@ -85,10 +85,13 @@ First charactor of the name is UPPERCASE.
 ### Implementation
 
 You should implement the following behavior for your preference and environment:
-1. choose the name of infrared data stored from parameters `state`, `interaction` and `level`.
+1. Choose the name of infrared data stored from parameters `state`, `interaction` and `level`.  
+  You can get the current device state from calling device_state.get_value method with interaction(same as name of attibute) of `state` instance. 
+
 1. Set the name in `data_name` variable as return value. 
 
 cmd4_adrsir sends infrared data bound for `data_name`, and moves the device state into `level`.
+
 
 **e.g.**
 ```python3:cmd4_adrsir.py
