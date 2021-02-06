@@ -160,14 +160,17 @@ def send_infrared_data(data_name):
     command = [IRCONTROL, "send", data_name]
 
     if data_name is not None:
-        process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        if process.returncode != 0:
-            Logger.debug_print_error("ERROR RUN: {}", command)
-            Logger.debug_print_error("ERROR RESULT: {} {}", process.returncode, process.stdout)
-        # for sending next, waiting 1 s after sending infrared data
-        time.sleep(1)
 
-    Logger.debug_print_info("IRCONTROL: {}", command)
+        for count in range(2):
+            # for sending next, waiting 0.3 s after sending infrared data
+            time.sleep(0.300)
+
+            process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            if process.returncode != 0:
+                Logger.debug_print_error("ERROR RUN{}: {}", count, command)
+                Logger.debug_print_error("ERROR DETAILS{}: {} {}", count, process.returncode, process.stdout)
+
+    Logger.debug_print_info("IRCONTROL: {}", " ".join(command))
 
 def start_process(value):
 
