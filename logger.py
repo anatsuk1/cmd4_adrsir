@@ -12,7 +12,7 @@ class Logger:
     # public final parameters
     OFF = 0
     ERROR = 1
-    WARNING = 2
+    WARN = 2
     INFO = 3
     TRACE = 4
 

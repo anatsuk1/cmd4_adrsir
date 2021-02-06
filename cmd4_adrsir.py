@@ -156,15 +156,14 @@ def send_infrared_data(data_name):
 
     # launch ircontrol command like as "<location>/ircontrol <option> <infrared data name>".
     # e.g. $ /usr/local/etc/adrsirlib/ircontrol send brightlight_preference
-
     command = [IRCONTROL, "send", data_name]
 
     if data_name is not None:
-
         for count in range(2):
-            # for sending next, waiting 0.3 s after sending infrared data
+            # wait for 300ms after sending infrared data.
             time.sleep(0.300)
 
+            # send infrared data here
             process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             if process.returncode != 0:
                 Logger.debug_print_error("ERROR RUN{}: {}", count, command)
