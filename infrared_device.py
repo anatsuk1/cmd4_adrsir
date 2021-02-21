@@ -5,6 +5,7 @@
 
 import os
 import sys
+import time
 import subprocess
 import fcntl
 import logging
@@ -87,19 +88,10 @@ class InfraredDevice:
         if level == previous_level:
             return
 
-        infrared = self.__choose_infrared_name(interaction, level)
+        infrared_code = self.__choose_infrared_code(interaction, level)
 
-        if infrared is not None:
-            send_command_line = f"{SEND_INFRARED_COMMAND} {infrared}"
-
-            send_command = send_command_line.split()
-            process = subprocess.run(send_command, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            if process.returncode != 0:
-                LOGGER.error(f"command line: {send_command}")
-                LOGGER.error(f"error code: {process.returncode}")
-                LOGGER.error(f"error message: {process.stdout}")
-                process.check_returncode()
-            LOGGER.info(f"Command rc: {process.returncode} cl: {send_command_line}")
+        if infrared_code is not None:
+            self.__send(infrared_code)
 
         # store state as value of attribute
         self.__device.set_value(interaction, level)
@@ -116,7 +108,26 @@ class InfraredDevice:
         """
         self.__device.save()
 
-    def __choose_infrared_name(self, interaction, level):
+    def __send(self, infrared_code):
+        LOGGER.debug(f"STR: {infrared_code}")
+
+        send_command_line = f"{SEND_INFRARED_COMMAND} {infrared_code}"
+
+        send_command = send_command_line.split()
+        process = subprocess.run(send_command, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        if process.returncode != 0:
+            LOGGER.error(f"command line: {send_command}")
+            LOGGER.error(f"error code: {process.returncode}")
+            LOGGER.error(f"error message: {process.stdout}")
+            process.check_returncode()
+        LOGGER.info(f"Command rc: {process.returncode} cl: {send_command_line}")
+
+        # sleep for 300ms
+        time.sleep(0.300)
+
+        LOGGER.debug(f"END")
+
+    def __choose_infrared_code(self, interaction, level):
         """ Choose the infrared code name to build a command line.
         Args:
             interaction: The action of Home Electornics.
@@ -124,19 +135,22 @@ class InfraredDevice:
         Returns:
             str: The name of infrared code
         """
-        choose_name: classmethod
+        LOGGER.debug(f"STR: {interaction}, {level}")
+
+        choose_code: classmethod
         device_name = self.__device.get_name()
 
         if device_name == "BrightLight":
-            choose_name = self.__choose_infrared_brightlight
+            choose_code = self.__choose_infrared_brightlight
         elif device_name == "DimLight":
-            choose_name = self.__choose_infrared_dimlight
+            choose_code = self.__choose_infrared_dimlight
         elif device_name == "AirConditioner":
-            choose_name = self.__choose_infrared_aircon
+            choose_code = self.__choose_infrared_aircon
 
-        infrared_name = choose_name(interaction, level)
+        infrared_code = choose_code(interaction, level)
 
-        return infrared_name
+        LOGGER.debug(f"STR: {infrared_code}")
+        return infrared_code
 
     def __choose_infrared_brightlight(self, interaction, level):
         LOGGER.debug(f"STR: {interaction}, {level}")
