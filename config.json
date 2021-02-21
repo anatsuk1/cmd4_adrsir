@@ -1,21 +1,19 @@
 {
-  "bridge": {
-    "name": "Rasberry Pi v4B",
-    "username": "CC:22:3D:E3:CE:30",
-    "manufacturer": "anatsuk1",
-    "model": "homebridge",
-    "port": 51826,
-    "pin": "031-45-156"
-  },
-
-  "ports": {
-    "start": 52100,
-    "end": 52150,
-    "comment": "This section is used to control the range of ports that separate accessory (like camera or television) should be bind to."
-  },
-  
-   "platforms" :
-   [
+   "bridge": {
+       "name": "Rasberry Pi v4B",
+       "username": "CC:22:3D:E3:CE:30",
+       "manufacturer": "anatsuk1",
+       "model": "homebridge",
+       "port": 51826,
+       "pin": "031-45-156"
+   },
+   "accessories": [],
+   "platforms": [
+      {
+         "platform": "config",
+         "name": "Config",
+         "port": 8581
+      },
       {
          "platform": "DysonPlatform",
          "name": "DysonPlatform",
@@ -25,7 +23,7 @@
                "ip": "DYSON-IP",
                "serialNumber": "DYSON-SERIALNUMBER",
                "password": "DYSON-PASSWORD",
-               "focusModeVisible" : false
+               "focusModeVisible": false
             }
          ]
       },
@@ -34,7 +32,7 @@
          "name": "Cmd4",
          "outputConstants": true,
          "restartRecover": false,
-         "accessories" : [
+         "accessories": [
             {
                "type": "Lightbulb",
                "displayName": "BrightLight",
@@ -46,7 +44,7 @@
                "Model": "Cmd4 model",
                "SerialNumber": "anatsuk1",
                "stateChangeResponseTime": 1,
-               "state_cmd": "/var/lib/homebridge/cmd4_adrsir.py"
+               "state_cmd": "/usr/local/infrared-remocon/infrared_device.py"
             },
             {
                "type": "Lightbulb",
@@ -59,7 +57,7 @@
                "Model": "Cmd4 model",
                "SerialNumber": "anatsuk1",
                "stateChangeResponseTime": 1,
-               "state_cmd": "/var/lib/homebridge/cmd4_adrsir.py"
+               "state_cmd": "/usr/local/infrared-remocon/infrared_device.py"
             },
             {
                "type": "HeaterCooler",
@@ -69,14 +67,14 @@
                "active": "Inactive",
                "currentHeaterCoolerState": "INACTIVE",
                "targetHeaterCoolerState": "AUTO",
-               "currentTemperature": 20.0,
+               "currentTemperature": 20,
                "coolingThresholdTemperature": 35,
                "heatingThresholdTemperature": 25,
                "Manufacturer": "MITSUBISHI",
                "Model": "Cmd4 model",
                "SerialNumber": "anatsuk1",
                "stateChangeResponseTime": 1,
-               "state_cmd": "/var/lib/homebridge/cmd4_adrsir.py"
+               "state_cmd": "/usr/local/infrared-remocon/infrared_device.py"
             }
          ]
       }

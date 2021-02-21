@@ -130,4 +130,6 @@ dmypy.json
 
 # added by anatsuk1
 .DS_Store
-copy_to_homebridge.bash
+install_infrared-remocon.sh
+infraredremocon.log
+device_state.json
