@@ -2,11 +2,11 @@
 
 echo "Start to install InfraredRemocon."
 
-echo "  Copying InfraredRemocon to /usr/local/"
-cp -R ../infrared-remocon /usr/local
+echo "  Copying InfraredRemocon to /var/opt/"
+cp -R ../infrared-remocon /var/opt
 
 echo "  Changing Owner and Group of InfraredRemocon directory"
-chown -R pi:pi /usr/local/infrared-remocon
+chown -R pi:pi /var/opt/infrared-remocon
 
 echo "  Copying 'config.json' file to /var/lib/homebridge/"
 cp ./config.json /var/lib/homebridge/

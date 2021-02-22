@@ -21,8 +21,8 @@ from device_state import DeviceState
 SCRIPT_DIRECTORY = os.path.dirname(__file__)
 
 # The paths to infrared HAT tool.
-CGIRTOOL: str = "/usr/local/cgir/cgirtool.py send"
-IRCONTROL: str = "/usr/local/adrsirlib/ircontrol send"
+CGIRTOOL: str = "/var/opt/cgir/cgirtool.py send"
+IRCONTROL: str = "/var/opt/adrsirlib/ircontrol send"
 
 # infrared codes json file.
 CGIRTOOL_CODE_JSON = os.path.join(SCRIPT_DIRECTORY, "codes.json")
@@ -130,8 +130,11 @@ class InfraredDevice:
     def __choose_infrared_code(self, interaction, level):
         """ Choose the infrared code name to build a command line.
         Args:
-            interaction: The action of Home Electornics.
-            level: The level of ``interaction``
+            interaction: is an action of Home Electornics
+                which is bound for user interaction on Home app on iOS.
+                The first charactor of the name is LOWERCASE
+                due to a bug of HomeBridge or CMD4.
+            level: is a level of ``interaction`` parameter.
         Returns:
             str: The name of infrared code
         """
@@ -301,11 +304,6 @@ def start_process(value):
         infrared_device.set(interaction, level)
 
         print_value = "0"
-
-        # Cmd4 retrieves the result of processing
-        # from stdout.
-        # 0 means success.
-        print(0)
 
     elif method == "Get":
         # put the level of interaction to stdout

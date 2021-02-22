@@ -1,16 +1,60 @@
-# cmd4_adrsir
+# InfraredRemocon Software
 
+[RPZ-IR-Sensor]: https://www.indoorcorgielec.com/products/rpz-ir-sensor/
+[cgir]: https://github.com/anatsuk1/cgir
+[ADRSIR]: https://bit-trade-one.co.jp/product/module/adrsir/
 [adrsirlib]: https://github.com/tokieng/adrsirlib
-[homebridges-cmd4]: https://github.com/ztalbot2000/homebridge-cmd4
+[Homebridges-cmd4]: https://github.com/ztalbot2000/homebridge-cmd4
 
-The cmd4_adrsir is to select and send ir data, written in Python 3.7(perhaps 3.5 or latar).
+InfraredRemocon is the smart infrared remote controller.
 
-`cmd4_adrsir` launchs [adrsirlib][adrsirlib], just fit to value of state_cmd attribute of [homebridges-cmd4][homebridges-cmd4].
+You can enjoy to control many Home Electronics and use Siri with HomeBridge and Cmd4.
+
+I strongly recommend [RPZ-IR-Sensor] from Raspberry Pi HATs to send infrared code.
+
+## Support Raspberry Pi HATs
+- [RPZ-IR-Sensor][RPZ-IR-Sensor] with [cgir][cgir] is the great product.
+- [ADRSIR][ADRSIR] with [adrsirlib][adrsirlib] has problems with frequently failing to send infrared codes and furthermore lack to send them to sufficient distance.
+
+# InfraredRemocon Features
+
+InfraredRemocon controls infrared devices.
+- Send infrared codes to Home Electronics.
+- Get a state of Home Electronics.
+- Choose a infrared code from infrared codes registered in infrared devices.
 
 # Usage
-Describe the path to `cmd_adrsir` stored in **state_cmd** attribute in `config.json` contained into homebridge.
+InfraredRemocon works well with HomeBridge and [Homebridges-cmd4][Homebridges-cmd4].
 
-An example for description is here:
+InfraredRemocon controls Home Electronics via voice through Siri on HomePod.
+
+I explain config.json infrared_device.py of InfraredRemocon, 
+
+## General Usage
+
+Describe `config.json` contained in HomeBridge.
+
+You add `infrared_device.py` of absolute path to **state_cmd** attribute.
+
+An example for `config.json`:
+
+**e.g.**
+```javascript:config.json
+{
+    "state_cmd": "/var/opt/infrared-remocon/infrared_device.py"
+}
+```
+
+# Port InfraredRemocon to your environment
+
+1. Describe `config.json` of your preference.
+1. Configure and port `infrared_device.py` to your environment.
+
+The present files both are for my environment and preference.
+
+## config.json
+
+Add your Home Electronics joining your Home Network.
 
 **e.g.**
 ```javascript:config.json
@@ -22,105 +66,162 @@ An example for description is here:
     "active": "Inactive",
     "currentHeaterCoolerState": "INACTIVE",
     "targetHeaterCoolerState": "AUTO",
-    "currentTemperature": 20.0,
+    "currentTemperature": 20,
     "coolingThresholdTemperature": 35,
     "heatingThresholdTemperature": 25,
     "Manufacturer": "MITSUBISHI",
     "Model": "Cmd4 model",
     "SerialNumber": "anatsuk1",
     "stateChangeResponseTime": 1,
-    "state_cmd": "/var/lib/homebridge/cmd4_adrsir.py"
-}
+    "state_cmd": "/var/opt/infrared-remocon/infrared_device.py"
+},
 ```
 
-# Port cmd4_adrsir to your environment
+## infrared_device.py
 
-1. Describe config.json of your preference.
-1. Port cmd4_adrsir.py to your environment.
+### Configuration
 
-The present both files are for my environment and preference.
+Change `SEND_INFRARED_COMMAND` variable to a command that sends infrared codes.
 
-## config.json
-
-Describe the path to `cmd_adrsir` stored in **state_cmd** attribute in `config.json`
-
-**e.g.**
-
-```javascript:config.json
-"state_cmd": "/var/lib/homebridge/cmd4_adrsir.py"
+```python:infrared_device.py
+# The command of Infrared sending
+SEND_INFRARED_COMMAND: str = CGIRTOOL + " -c " + CGIRTOOL_CODE_JSON
 ```
 
-## cmd4_adrsir.py
-Set environment dependent commands in below Variables.
+Commands to infrared HAT tools are available to set `SEND_INFRARED_COMMAND`.
 
-|Variable|Description
-|:-----------|:------------
-|IRCONTROL|path to `ircontrol` script file contained in adrsirlib
+|Recommend|Command|Description
+|:----------|:-----------|:------------
+|YES|CGIRTOOL|Send command that `cgirtool.py` contained in cgir with `send` followed.
+||IRCONTROL|Send command that `ircontrol` contained in adrsirlib with `send` followed.
 
-`ircontrol` is the python script to send and receive infrared data and it store infrared data in persistent storage.
+### Porting 
 
-**e.g.**
+I require that your code conform the following function signature.
 
-```python3:cmd4_adrsir.py
-#
-# Configure
-#
-# adrsirlib script on python3
-IRCONTROL = "/usr/local/etc/adrsirlib/ircontrol"
-```
-
-## Redesign choose_data_name() function
+You will rewrite implemantation of this function. The present implemantation is for my environment.
 
 ### Function signature is here:
-
-```python3:cmd4_adrsir.py
-def choose_data_name(state, interaction, level):
+```python:infrared_device.py
+class InfraredDevice:
+    def __choose_infrared_code(self, interaction, level)
+        """ Choose the infrared code name to build a command line.
+        Args:
+            interaction: is an action of Home Electornics
+                which is bound for user interaction on Home app on iOS.
+                The first charactor of the name is LOWERCASE
+                due to a bug of HomeBridge or CMD4.
+            level: is a level of ``interaction`` parameter.
+        Returns:
+            str: The name of infrared code
+        """
 ```
-- `state`: is an instance of DeviceState class which contains the device and the current state of it.  
-  **Notice**: The device is the value "displayName" attribute NOT "name" attribute.
-- `interaction`: is the name of attribute which is bound for user interaction.  
-First charactor of the name is UPPERCASE.
-- `level`: is the value of `interaction` attribute.
+
+#### Parameters
+**Function specification:**
+
+Choose the infrared code name to build a command line.
+
+#### Parameters
+|Parameter|Description
+|:----------|:-----------
+|`self (InfraredDevice)`|is an instance of InfraredDevice class which contains current state of Home Electornics.
+|`interaction (str)`|is an action of Home Electornics which is bound for user interaction on Home app on iOS.<br>The first charactor of the name is LOWERCASE due to a bug of HomeBridge or CMD4.
+|`level (Any)`|is a level of `interaction` parameter.
+
+#### Return
+**`Return (str)`:**
+
+The name of infrared code
 
 ### Implementation
 
 You should implement the following behavior for your preference and environment:
-1. Choose the name of infrared data stored from parameters `state`, `interaction` and `level`.  
-  You can get the current device state from calling device_state.get_value method with interaction(same as name of attibute) of `state` instance. 
+1. Choose the infrared data code by parameters `self`, `interaction` and `level`.  
+  You can get the current device state from calling self.__device.get_value() method with interaction(same as the name of attibute). 
 
-1. Set the name in `data_name` variable as return value. 
+1. Return the infrared data code 
 
-cmd4_adrsir sends infrared data bound for `data_name`, and moves the device state into `level`.
+InfraredRemocon will send the infrared code and change `interaction` to `level`.
 
+**e.g.) __choose_infrared_aircon(self, interaction, level) function**
+```python:infrared_device.py
+    LOGGER.debug(f"STR: {interaction}, {level}")
 
-**e.g.**
-```python3:cmd4_adrsir.py
-    elif device == "AirConditioner":
+    # The special code to fix a bug of HomeBridge.
+    # Not clear HomeBrdige passing the *CASE* of name of attributes and values.
+    # I must compare atteributes on UPPERCASE.
+    interaction = interaction.upper()
 
-        active = state.get_value("active")
-        heater_cooler = state.get_value("targetHeaterCoolerState")
-        next_active = active
-        next_heater_cooler = heater_cooler
+    if interaction != "ACTIVE" and interaction != "TARGETHEATERCOOLERSTATE":
+        return
 
-        if interaction == "active":
-            next_active = level
-        elif interaction == "targetHeaterCoolerState":
-            next_heater_cooler = level
+    infrared_aircon = None
+    active: str
+    heater_cooler_state: str
 
-        if active != next_active or heater_cooler != next_heater_cooler:
-            data_name = select_aircon_name(next_active, next_heater_cooler)
+    # Get values of on and brightness attributes
+    if interaction == "ACTIVE":
+        active = level
+        heater_cooler_state = self.__device.get_value("targetHeaterCoolerState")
+    elif interaction == "TARGETHEATERCOOLERSTATE":
+        active = self.__device.get_value("active")
+        heater_cooler_state = level
+
+    # The special code to fix a bug of HomeBridge.
+    # Not clear HomeBrdige passing the *CASE* of values.
+    # I must compare atteributes on UPPERCASE.
+    active = active.upper()
+    heater_cooler_state = heater_cooler_state.upper()
+
+    # INACTIVE
+    if active == "INACTIVE":
+        infrared_aircon = "aircon_off"
+    # ACTIVE
+    elif active == "ACTIVE":
+        # AUTO, if INACTIVE or IDLE comes, perhaps HomeBrdige has some bugs.
+        if heater_cooler_state == "AUTO" or \
+                heater_cooler_state == "INACTIVE" or \
+                heater_cooler_state == "IDLE":
+            infrared_aircon = "aircon_off"
+        # HEAT
+        elif heater_cooler_state == "HEAT":
+            infrared_aircon = "aircon_warm-22-auto"
+        # COOL
+        elif heater_cooler_state == "COOL":
+            infrared_aircon = "aircon_cool-26-auto"
+
+    LOGGER.debug(f"STR: {infrared_aircon}")
+    return infrared_aircon
 ```
+# Misc
+
+I explain useful files included.
+- codes.json  
+  Infrared Code for cgir.
+- example.install_infrared-remocon.sh  
+  The install script contains replacement process of sensitive information.  
+  Run the install script after change dummy-word(as `XXX`) to your real information.
 
 # Thanks
-## adrsirlib
+## @IndoorCorgi
+@IndoorCorgi developed [RPZ-IR-Sensor][RPZ-IR-Sensor] and [cgir][cgir].
+
+They have done great work on hardware and software.
+
+[Their GitHub page is here.][cgir]
+
+## @tokieng
 @tokieng created the python script which great and helpful.
-So, I am happy to have found adrsirlib now.
+
+I was happy to find adrsirlib before.
+
 [tokieng's GitHub page is here.][adrsirlib]
 
-## Homebridges-cmd4
-@ztalbot2000 provide me better homebridge plugin.
+## @ztalbot2000
+@ztalbot2000 provides us better homebridge plugin, Homebridges-cmd4.
 
-I hope that ztalbot2000 provides documentations and examples of Homebridges-cmd4 more.
+I hope that he provides documentations and examples of Homebridges-cmd4 more.
 
 [ztalbot2000's GitHub page is here.][Homebridges-cmd4]
 
@@ -130,5 +231,5 @@ I hope that ztalbot2000 provides documentations and examples of Homebridges-cmd4
 # Environment
 cmd4_adrsir is running but not limited with the followings.
 - Python 3.7.3
-- Homebridges-cmd4 3.0.15
-- Homebridge 1.1.7
+- Homebridges-cmd4 3.1.3
+- Homebridge 1.2.5
