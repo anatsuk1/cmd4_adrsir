@@ -63,7 +63,7 @@ Add your Home Electronics joining your Home Network.
     "displayName": "AirConditioner",
     "name": "AirConditioner",
     "temperatureDisplayUnits": "CELSIUS",
-    "active": "Inactive",
+    "active": "INACTIVE",
     "currentHeaterCoolerState": "INACTIVE",
     "targetHeaterCoolerState": "AUTO",
     "currentTemperature": 20,
@@ -74,7 +74,7 @@ Add your Home Electronics joining your Home Network.
     "SerialNumber": "anatsuk1",
     "stateChangeResponseTime": 1,
     "state_cmd": "/var/opt/infrared-remocon/infrared_device.py"
-},
+}
 ```
 
 ## infrared_device.py
@@ -232,4 +232,4 @@ I hope that he provides documentations and examples of Homebridges-cmd4 more.
 cmd4_adrsir is running but not limited with the followings.
 - Python 3.7.3
 - Homebridges-cmd4 3.1.3
-- Homebridge 1.2.5
+- Homebridge 1.3.0

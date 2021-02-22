@@ -64,7 +64,7 @@
                "displayName": "AirConditioner",
                "name": "AirConditioner",
                "temperatureDisplayUnits": "CELSIUS",
-               "active": "Inactive",
+               "active": "INACTIVE",
                "currentHeaterCoolerState": "INACTIVE",
                "targetHeaterCoolerState": "AUTO",
                "currentTemperature": 20,
