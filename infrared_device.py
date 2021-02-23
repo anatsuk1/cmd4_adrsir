@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # Copyright (c) 2020, 2021 anatsuk1. All rights reserved.
-# InfraredRemocon software is licensed under BSD 2-Clause license.
+# Infrasmacon software is licensed under BSD 2-Clause license.
 
 import os
 import sys
@@ -17,7 +17,7 @@ from device_state import DeviceState
 ######################
 # Advanced Configure #
 ######################
-# The directory of InfraredRemocon stored.
+# The directory of Infrasmacon stored.
 SCRIPT_DIRECTORY = os.path.dirname(__file__)
 
 # The paths to infrared HAT tool.
@@ -37,7 +37,7 @@ SEND_INFRARED_COMMAND: str = CGIRTOOL + " -c " + CGIRTOOL_CODE_JSON
 
 # Log Settings
 LOGGER_LOG_LEVEL = logging.INFO
-LOGGER_LOG_FILENAME = os.path.join(SCRIPT_DIRECTORY, "infrared-remocon.log")
+LOGGER_LOG_FILENAME = os.path.join(SCRIPT_DIRECTORY, "infrasmacon.log")
 
 # The persistent state file of devices.
 STATE_FILE = os.path.join(SCRIPT_DIRECTORY, "device_state.json")

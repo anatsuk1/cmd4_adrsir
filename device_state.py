@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # Copyright (c) 2021, anatsuk1. All rights reserved.
-# InfraredRemocon software is licensed under BSD 2-Clause license.
+# Infrasmacon software is licensed under BSD 2-Clause license.
 
 import json
 import logging

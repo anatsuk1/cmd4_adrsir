@@ -44,7 +44,7 @@
                "Model": "Cmd4 model",
                "SerialNumber": "anatsuk1",
                "stateChangeResponseTime": 1,
-               "state_cmd": "/var/opt/infrared-remocon/infrared_device.py"
+               "state_cmd": "/var/opt/infrasmacon/infrared_device.py"
             },
             {
                "type": "Lightbulb",
@@ -57,7 +57,7 @@
                "Model": "Cmd4 model",
                "SerialNumber": "anatsuk1",
                "stateChangeResponseTime": 1,
-               "state_cmd": "/var/opt/infrared-remocon/infrared_device.py"
+               "state_cmd": "/var/opt/infrasmacon/infrared_device.py"
             },
             {
                "type": "HeaterCooler",
@@ -74,7 +74,7 @@
                "Model": "Cmd4 model",
                "SerialNumber": "anatsuk1",
                "stateChangeResponseTime": 1,
-               "state_cmd": "/var/opt/infrared-remocon/infrared_device.py"
+               "state_cmd": "/var/opt/infrasmacon/infrared_device.py"
             }
          ]
       }

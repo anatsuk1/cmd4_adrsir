@@ -1,12 +1,12 @@
 #!/usr/bin/env sh
 
-echo "Start to install InfraredRemocon."
+echo "Start to install Infrasmacon."
 
-echo "  Copying InfraredRemocon to /var/opt/"
-cp -R ../infrared-remocon /var/opt
+echo "  Copying Infrasmacon to /var/opt/"
+cp -R ../infrasmacon /var/opt
 
-echo "  Changing Owner and Group of InfraredRemocon directory"
-chown -R pi:pi /var/opt/infrared-remocon
+echo "  Changing Owner and Group of Infrasmacon directory"
+chown -R pi:pi /var/opt/infrasmacon
 
 echo "  Copying 'config.json' file to /var/lib/homebridge/"
 cp ./config.json /var/lib/homebridge/
@@ -16,4 +16,4 @@ sed -i -e 's/DYSON-IP/XXX.XXX.XXX.XXX/g' /var/lib/homebridge/config.json
 sed -i -e 's/DYSON-SERIALNUMBER/XXXXX-XXX-XX-XXXXXXXX-XXX/g' /var/lib/homebridge/config.json
 sed -i -e 's/DYSON-PASSWORD/XXXXXXXXXXXXXXXX/g' /var/lib/homebridge/config.json
 
-echo "Installing InfraredRemocon is finished."
+echo "Installing Infrasmacon is finished."

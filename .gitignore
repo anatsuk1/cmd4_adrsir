@@ -130,6 +130,6 @@ dmypy.json
 
 # added by anatsuk1
 .DS_Store
-install_infrared-remocon.sh
-infraredremocon.log
+install_infrasmacon.sh
+infrasmacon.log
 device_state.json

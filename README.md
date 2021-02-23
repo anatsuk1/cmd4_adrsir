@@ -1,4 +1,4 @@
-# InfraredRemocon Software
+# Infrasmacon Software
 
 [RPZ-IR-Sensor]: https://www.indoorcorgielec.com/products/rpz-ir-sensor/
 [cgir]: https://github.com/anatsuk1/cgir
@@ -6,7 +6,7 @@
 [adrsirlib]: https://github.com/tokieng/adrsirlib
 [Homebridges-cmd4]: https://github.com/ztalbot2000/homebridge-cmd4
 
-InfraredRemocon is the smart infrared remote controller.
+Infrasmacon is the smart infrared remote controller.
 
 You can enjoy to control many Home Electronics and use Siri with HomeBridge and Cmd4.
 
@@ -16,19 +16,19 @@ I strongly recommend [RPZ-IR-Sensor] from Raspberry Pi HATs to send infrared cod
 - [RPZ-IR-Sensor][RPZ-IR-Sensor] with [cgir][cgir] is the great product.
 - [ADRSIR][ADRSIR] with [adrsirlib][adrsirlib] has problems with frequently failing to send infrared codes and furthermore lack to send them to sufficient distance.
 
-# InfraredRemocon Features
+# Infrasmacon Features
 
-InfraredRemocon controls infrared devices.
+Infrasmacon controls infrared devices.
 - Send infrared codes to Home Electronics.
 - Get a state of Home Electronics.
 - Choose a infrared code from infrared codes registered in infrared devices.
 
 # Usage
-InfraredRemocon works well with HomeBridge and [Homebridges-cmd4][Homebridges-cmd4].
+Infrasmacon works well with HomeBridge and [Homebridges-cmd4][Homebridges-cmd4].
 
-InfraredRemocon controls Home Electronics via voice through Siri on HomePod.
+Infrasmacon controls Home Electronics via voice through Siri on HomePod.
 
-I explain config.json infrared_device.py of InfraredRemocon, 
+I explain config.json infrared_device.py of Infrasmacon, 
 
 ## General Usage
 
@@ -41,11 +41,11 @@ An example for `config.json`:
 **e.g.**
 ```javascript:config.json
 {
-    "state_cmd": "/var/opt/infrared-remocon/infrared_device.py"
+    "state_cmd": "/var/opt/infrasmacon/infrared_device.py"
 }
 ```
 
-# Port InfraredRemocon to your environment
+# Port Infrasmacon to your environment
 
 1. Describe `config.json` of your preference.
 1. Configure and port `infrared_device.py` to your environment.
@@ -73,7 +73,7 @@ Add your Home Electronics joining your Home Network.
     "Model": "Cmd4 model",
     "SerialNumber": "anatsuk1",
     "stateChangeResponseTime": 1,
-    "state_cmd": "/var/opt/infrared-remocon/infrared_device.py"
+    "state_cmd": "/var/opt/infrasmacon/infrared_device.py"
 }
 ```
 
@@ -142,7 +142,7 @@ You should implement the following behavior for your preference and environment:
 
 1. Return the infrared data code 
 
-InfraredRemocon will send the infrared code and change `interaction` to `level`.
+Infrasmacon will send the infrared code and change `interaction` to `level`.
 
 **e.g.) __choose_infrared_aircon(self, interaction, level) function**
 ```python:infrared_device.py
@@ -199,7 +199,7 @@ InfraredRemocon will send the infrared code and change `interaction` to `level`.
 I explain useful files included.
 - codes.json  
   Infrared Code for cgir.
-- example.install_infrared-remocon.sh  
+- example.install_infrasmacon.sh  
   The install script contains replacement process of sensitive information.  
   Run the install script after change dummy-word(as `XXX`) to your real information.
 
