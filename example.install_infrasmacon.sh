@@ -16,4 +16,8 @@ sed -i -e 's/DYSON-IP/XXX.XXX.XXX.XXX/g' /var/lib/homebridge/config.json
 sed -i -e 's/DYSON-SERIALNUMBER/XXXXX-XXX-XX-XXXXXXXX-XXX/g' /var/lib/homebridge/config.json
 sed -i -e 's/DYSON-PASSWORD/XXXXXXXXXXXXXXXX/g' /var/lib/homebridge/config.json
 
+echo "  Replacing sensitive infomation in /var/lib/homebridge/config.json"
+sed -i -e 's/HUE-ATTRIBUTE/XXXXXXXXXXXXXXXX/g' /var/lib/homebridge/config.json
+sed -i -e 's/HUE-VALUE/XXXXXXXXXX/g' /var/lib/homebridge/config.json
+
 echo "Installing Infrasmacon is finished."
