@@ -253,10 +253,8 @@ class InfraredDevice:
         # ACTIVE
         elif active == "ACTIVE":
             # AUTO, if INACTIVE or IDLE comes, perhaps HomeBrdige has some bugs.
-            if heater_cooler_state == "AUTO" or \
-                    heater_cooler_state == "INACTIVE" or \
-                    heater_cooler_state == "IDLE":
-                infrared_aircon = "aircon_off"
+            if heater_cooler_state == "AUTO":
+                infrared_aircon = "aircon_dehumidify-auto-auto"
             # HEAT
             elif heater_cooler_state == "HEAT":
                 infrared_aircon = "aircon_warm-22-auto"

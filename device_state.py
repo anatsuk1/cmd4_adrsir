@@ -120,15 +120,22 @@ class DeviceState:
 
         # Simulate current state.
         # When set target state, set current state in the same time.
-        if attribute == "targetHeaterCoolerState":
-            current_attribute = "currentHeaterCoolerState"
-            current_value: str
+        current_attribute = "currentHeaterCoolerState"
+        current_value = None
+
+        if attribute == "active":
+            if value == "INACTIVE":
+                current_value = "INACTIVE"
+
+        elif attribute == "targetHeaterCoolerState":
             if value == "AUTO":
                 current_value = "IDLE"
             elif value == "HEAT":
                 current_value = "HEATING"
             elif value == "COOL":
                 current_value = "COOLING"
+
+        if current_value is not None:
             self.__state[self.__device_name][current_attribute] = current_value
             LOGGER.info(f"Change current state: {current_attribute}={current_value}")
 
