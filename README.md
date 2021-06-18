@@ -13,24 +13,27 @@ You can enjoy to control many Home Electronics and use Siri with HomeBridge and 
 I strongly recommend [RPZ-IR-Sensor] from Raspberry Pi HATs to send infrared code.
 
 ## Support Raspberry Pi HATs
+
 - [RPZ-IR-Sensor][RPZ-IR-Sensor] with [cgir][cgir] is the great product.
 - [ADRSIR][ADRSIR] with [adrsirlib][adrsirlib] has problems with frequently failing to send infrared codes and furthermore lack to send them to sufficient distance.
 
-# Infrasmacon Features
+## Infrasmacon Features
 
 Infrasmacon controls infrared devices.
+
 - Send infrared codes to Home Electronics.
 - Get a state of Home Electronics.
 - Choose a infrared code from infrared codes registered in infrared devices.
 
-# Usage
+## Usage
+
 Infrasmacon works well with HomeBridge and [Homebridges-cmd4][Homebridges-cmd4].
 
 Infrasmacon controls Home Electronics via voice through Siri on HomePod.
 
 I explain config.json infrared_device.py of Infrasmacon, 
 
-## General Usage
+### General Usage
 
 Describe `config.json` contained in HomeBridge.
 
@@ -39,24 +42,26 @@ You add `infrared_device.py` of absolute path to **state_cmd** attribute.
 An example for `config.json`:
 
 **e.g.**
+
 ```javascript:config.json
 {
     "state_cmd": "/var/opt/infrasmacon/infrared_device.py"
 }
 ```
 
-# Port Infrasmacon to your environment
+### Port Infrasmacon to your environment
 
 1. Describe `config.json` of your preference.
 1. Configure and port `infrared_device.py` to your environment.
 
 The present files both are for my environment and preference.
 
-## config.json
+### config.json
 
 Add your Home Electronics joining your Home Network.
 
 **e.g.**
+
 ```javascript:config.json
 {
     "type": "HeaterCooler",
@@ -77,9 +82,9 @@ Add your Home Electronics joining your Home Network.
 }
 ```
 
-## infrared_device.py
+### infrared_device.py
 
-### Configuration
+#### Configuration
 
 Change `SEND_INFRARED_COMMAND` variable to a command that sends infrared codes.
 
@@ -95,13 +100,14 @@ Commands to infrared HAT tools are available to set `SEND_INFRARED_COMMAND`.
 |YES|CGIRTOOL|Send command that `cgirtool.py` contained in cgir with `send` followed.
 ||IRCONTROL|Send command that `ircontrol` contained in adrsirlib with `send` followed.
 
-### Porting 
+#### Porting
 
-I require that your code conform the following function signature.
+I require that your code conforms the following function signature.
 
 You will rewrite implemantation of this function. The present implemantation is for my environment.
 
-### Function signature is here:
+**Function Signature:**
+
 ```python:infrared_device.py
 class InfraredDevice:
     def __choose_infrared_code(self, interaction, level)
@@ -117,34 +123,33 @@ class InfraredDevice:
         """
 ```
 
-#### Parameters
-**Function specification:**
+**Function Specification:**
 
 Choose the infrared code name to build a command line.
 
-#### Parameters
 |Parameter|Description
 |:----------|:-----------
 |`self (InfraredDevice)`|is an instance of InfraredDevice class which contains current state of Home Electornics.
 |`interaction (str)`|is an action of Home Electornics which is bound for user interaction on Home app on iOS.<br>The first charactor of the name is LOWERCASE due to a bug of HomeBridge or CMD4.
 |`level (Any)`|is a level of `interaction` parameter.
 
-#### Return
-**`Return (str)`:**
+**Function Return:**
 
-The name of infrared code
+`Return (str)`: The name of infrared code.
 
-### Implementation
+#### Implementation
 
 You should implement the following behavior for your preference and environment:
-1. Choose the infrared data code by parameters `self`, `interaction` and `level`.  
-  You can get the current device state from calling self.__device.get_value() method with interaction(same as the name of attibute). 
 
-1. Return the infrared data code 
+1. Choose the infrared data code by parameters `self`, `interaction` and `level`.  
+  You can get the current device state from calling self.__device.get_value() method with interaction(same as the name of attibute).
+
+1. Return the infrared data code.
 
 Infrasmacon will send the infrared code and change `interaction` to `level`.
 
-**e.g.) __choose_infrared_aircon(self, interaction, level) function**
+**`e.g.) __choose_infrared_aircon(self, interaction, level)` function**
+
 ```python:infrared_device.py
     LOGGER.debug(f"STR: {interaction}, {level}")
 
@@ -194,42 +199,51 @@ Infrasmacon will send the infrared code and change `interaction` to `level`.
     LOGGER.debug(f"STR: {infrared_aircon}")
     return infrared_aircon
 ```
-# Misc
+
+## Misc
 
 I explain useful files included.
+
 - codes.json  
-  Infrared Code for cgir.
+  Some infrared codes for cgir.
 - example.install_infrasmacon.sh  
   The install script contains replacement process of sensitive information.  
   Run the install script after change dummy-word(as `XXX`) to your real information.
 
-# Thanks
-## @IndoorCorgi
+## Thanks
+
+### @IndoorCorgi
+
 @IndoorCorgi developed [RPZ-IR-Sensor][RPZ-IR-Sensor] and [cgir][cgir].
 
 They have done great work on hardware and software.
 
 [Their GitHub page is here.][cgir]
 
-## @tokieng
+### @tokieng
+
 @tokieng created the python script which great and helpful.
 
 I was happy to find adrsirlib before.
 
 [tokieng's GitHub page is here.][adrsirlib]
 
-## @ztalbot2000
+### @ztalbot2000
+
 @ztalbot2000 provides us better homebridge plugin, Homebridges-cmd4.
 
 I hope that he provides documentations and examples of Homebridges-cmd4 more.
 
 [ztalbot2000's GitHub page is here.][Homebridges-cmd4]
 
-# No Thanks
+## No Thanks
+
 [Bit Trade One, LTD.(ADRSIR design, manufacturing and sales)](https://bit-trade-one.co.jp) provides USELESS scripts and NO support.
 
-# Environment
+## Environment
+
 cmd4_adrsir is running but not limited with the followings.
+
 - Python 3.7.3
-- Homebridges-cmd4 3.1.3
-- Homebridge 1.3.0
+- Homebridges-cmd4 3.10.1
+- Homebridge 1.3.4
