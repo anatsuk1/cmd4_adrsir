@@ -49,14 +49,14 @@ An example for `config.json`:
 }
 ```
 
-### Port Infrasmacon to your environment
+## Port Infrasmacon to your environment
 
 1. Describe `config.json` of your preference.
 1. Configure and port `infrared_device.py` to your environment.
 
 The present files both are for my environment and preference.
 
-### config.json
+## config.json
 
 Add your Home Electronics joining your Home Network.
 
@@ -82,9 +82,9 @@ Add your Home Electronics joining your Home Network.
 }
 ```
 
-### infrared_device.py
+## infrared_device.py
 
-#### Configuration
+### Configuration
 
 Change `SEND_INFRARED_COMMAND` variable to a command that sends infrared codes.
 
@@ -100,7 +100,7 @@ Commands to infrared HAT tools are available to set `SEND_INFRARED_COMMAND`.
 |YES|CGIRTOOL|Send command that `cgirtool.py` contained in cgir with `send` followed.
 ||IRCONTROL|Send command that `ircontrol` contained in adrsirlib with `send` followed.
 
-#### Porting
+### Porting
 
 I require that your code conforms the following function signature.
 
@@ -137,7 +137,7 @@ Choose the infrared code name to build a command line.
 
 `Return (str)`: The name of infrared code.
 
-#### Implementation
+### Implementation
 
 You should implement the following behavior for your preference and environment:
 
